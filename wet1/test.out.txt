@@ -1,0 +1,16 @@
+Init done.
+AddStudent: SUCCESS
+AddStudent: FAILURE
+AddStudent: SUCCESS
+AddTeam: SUCCESS
+MoveStudentToTeam: SUCCESS
+GetMostPowerful: FAILURE
+Most powerful student is: 1
+MoveStudentToTeam: SUCCESS
+Most powerful student is: 2
+IncreaseLevel: SUCCESS
+Rank	||	Student
+1		||	1
+2		||	2
+and there are no more students!
+Quit done.

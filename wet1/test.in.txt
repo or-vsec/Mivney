@@ -1,0 +1,13 @@
+Init
+AddStudent 1 0 2
+AddStudent 1 2 2
+AddStudent 2 1 4
+AddTeam 1
+MoveStudentToTeam 1 1
+GetMostPowerful 2
+GetMostPowerful 1
+MoveStudentToTeam 2 1
+GetMostPowerful 1
+IncreaseLevel 0 3
+GetAllStudentsByPower 1
+Quit
