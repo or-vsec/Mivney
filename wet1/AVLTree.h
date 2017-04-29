@@ -25,7 +25,7 @@ protected:
 		Node* right_son;
 		int height;
 		Node(KeyType const & key, ValueType const & value) : key(key), value(value), father(nullptr), left_son(nullptr), right_son(nullptr), height(0) {}
-		Node() = delete;
+		Node() = default;
 		void UpdateHeight() {
 			if (left_son == nullptr && right_son == nullptr) height = 0;
 			else if (right_son == nullptr) height = left_son->height + 1;
@@ -43,25 +43,36 @@ protected:
 		}
 	};
 
+	// Members
 	Node* root;
 	Node* last_searched_node;
 	int size;
 
+	// Protected methods
 	Node* Find_Recursive(KeyType const & key, Node* node);
+
 	Node** GetFatherToSonLinkPointer(Node* son);
+
 	void SwapNodes(Node& a, Node& b);
+
 	void Balance(Node* node);
 	void BalanceBottomTop(Node* bottom);
 	void LLRotation(Node * b);
 	void LRRotation(Node * b);
 	void RRRotation(Node * b);
 	void RLRotation(Node * b);
+
 	void DeleteRecursive(Node* node);
+
 	void AddToArrayRecursive(Node* node, Node** array, int* offset);
 	Node** TreeToArray();
 
+	Node* CompleteTree(int height);
+	void MinimizeCompleteTree(Node* root, int final_size, int *current_size);
+	AVLTree(Node** array, int size, int height);
+
 public:
-	AVLTree(Node** array, int size);
+	// Public Methods
 	AVLTree() : root(nullptr), size(0) {};
 	~AVLTree() { DeleteRecursive(root); };
 	void Insert(KeyType const & key, ValueType const & value);
@@ -215,15 +226,53 @@ void AVLTree<KeyType, ValueType>::AddToArrayRecursive(Node * node, Node ** array
 template<typename KeyType, typename ValueType>
 typename AVLTree<KeyType, ValueType>::Node ** AVLTree<KeyType, ValueType>::TreeToArray()
 {
-	Node** array = malloc(size * sizeof(Node*));
+	Node** array = new Node*[size];
 	int offset = 0;
 	AddToArrayRecursive(root, array, &offset);
 	return array;
 }
 
 template<typename KeyType, typename ValueType>
+typename AVLTree<KeyType, ValueType>::Node * AVLTree<KeyType, ValueType>::CompleteTree(int height)
+{
+	if (height == -1) return nullptr;
+	Node* left_son = CompleteTree(height - 1);
+	Node* right_son = CompleteTree(height - 1);
+	Node* root = new Node();
+	root->left_son = left_son;
+	root->right_son = right_son;
+	if (left_son != nullptr) left_son->father = root;
+	if (right_son != nullptr) right_son->father = root;
+	root->height = height;
+	return root;
+}
+
+template<typename KeyType, typename ValueType>
+void AVLTree<KeyType, ValueType>::MinimizeCompleteTree(Node* root, int final_size, int *current_size)
+{
+	if (*current_size == final_size) return;
+	MinimizeCompleteTree(root->right_son, final_size, current_size);
+	if (root->height == 0) {
+		*(GetFatherToSonLinkPointer(root)) = nullptr;
+		delete root;
+		*current_size--;
+	}
+	MinimizeCompleteTree(root->left_son, final_size, current_size);
+}
+
+template<typename KeyType, typename ValueType>
+AVLTree<KeyType, ValueType>::AVLTree(Node ** array, int size, int height)
+{
+	Node* blank_tree = CompleteTree(height);
+	int current_size = 2**height;
+	MinimizeCompleteTree(blank_tree, size, &current_size);
+
+}
+
+template<typename KeyType, typename ValueType>
 void AVLTree<KeyType, ValueType>::Insert(KeyType const & key, ValueType const & value)
 {
+	AVLTree tree(nullptr, 5, 2);
 	if (root == nullptr) {
 		root = new Node(key, value);
 		size++;
