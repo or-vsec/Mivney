@@ -57,11 +57,12 @@ protected:
 	void LRRotation(Node * b);
 	void RRRotation(Node * b);
 	void RLRotation(Node * b);
+	void DeleteRecursive(Node* node);
 
 public:
 
 	AVLTree() : root(nullptr), size(0) {};
-	~AVLTree() {};
+	~AVLTree() { DeleteRecursive(root); };
 	void Insert(KeyType const & key, ValueType const & value);
 	void Erase(KeyType const & key);
 	ValueType& Find(KeyType const & key);
@@ -189,6 +190,15 @@ void AVLTree<KeyType, ValueType>::RLRotation(Node * b)
 {
 	LLRotation(b->right_son);
 	RRRotation(b);
+}
+
+template<typename KeyType, typename ValueType>
+void AVLTree<KeyType, ValueType>::DeleteRecursive(Node * node)
+{
+	if (node == nullptr) return;
+	DeleteRecursive(node->left_son);
+	DeleteRecursive(node->right_son);
+	delete node;
 }
 
 template<typename KeyType, typename ValueType>
