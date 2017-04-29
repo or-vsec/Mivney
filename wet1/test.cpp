@@ -2,14 +2,33 @@
 
 int main() {
 	AVLTree<int, int> tree;
-	tree.Insert(1,1);
-	tree.Insert(4,4);
-	tree.Insert(3,3);
-	tree.Find(4);
-	tree.Find(3);
-	tree.Erase(4);
-	tree.Find(3);
-	tree.Find(4);
+
+	for (int i = 0; i <= 1000; i++) {
+		tree.Insert(i, i);
+		for (int j = 0; j <= i; j++) {
+			tree.Find(j);
+		}
+	}
+	for (int i = 0; i <= 1000; i++) {
+		tree.Erase(i);
+		for (int j = 1000; j > i; j--) {
+			tree.Find(j);
+		}
+	}
+
+	for (int i = 1000; i >= 0; i--) {
+		tree.Insert(i, i);
+		for (int j = 1000; j >= i; j--) {
+			tree.Find(j);
+		}
+	}
+	for (int i = 1000; i >= 0; i--) {
+		tree.Erase(i);
+		for (int j = 1000; j >i; j--) {
+			tree.Find(j);
+		}
+	}
+
 
 	return 0;
 }

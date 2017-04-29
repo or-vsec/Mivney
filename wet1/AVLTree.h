@@ -206,6 +206,7 @@ void AVLTree<KeyType, ValueType>::Insert(KeyType const & key, ValueType const & 
 {
 	if (root == nullptr) {
 		root = new Node(key, value);
+		size++;
 		return;
 	}
 	try {
@@ -223,6 +224,7 @@ void AVLTree<KeyType, ValueType>::Insert(KeyType const & key, ValueType const & 
 	}
 
 	BalanceBottomTop(new_node);
+	size++;
 }
 
 template<typename KeyType, typename ValueType>
@@ -237,6 +239,8 @@ inline void AVLTree<KeyType, ValueType>::Erase(KeyType const & key)
 		SwapNodes(*node_to_delete, *next_minimal_node);
 	}
 
+	BalanceBottomTop(node_to_delete);
+
 	Node** father_to_son_pointer = GetFatherToSonLinkPointer(node_to_delete);
 	if (node_to_delete->left_son == nullptr && node_to_delete->right_son == nullptr) {
 		*father_to_son_pointer = nullptr;
@@ -250,9 +254,8 @@ inline void AVLTree<KeyType, ValueType>::Erase(KeyType const & key)
 		node_to_delete->left_son->father = node_to_delete->father;
 	}
 
-	BalanceBottomTop(node_to_delete);
-
 	delete node_to_delete;
+	size--;
 }
 
 template<typename KeyType, typename ValueType>
