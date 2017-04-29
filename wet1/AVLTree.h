@@ -219,33 +219,30 @@ template<typename KeyType, typename ValueType>
 inline void AVLTree<KeyType, ValueType>::Erase(KeyType const & key)
 {
 	Node* node_to_delete = Find_Recursive(key, root);
-	Node** father_to_son_pointer = GetFatherToSonLinkPointer(node_to_delete);
 	if (node_to_delete->left_son != nullptr && node_to_delete->right_son != nullptr) {
 		Node* next_minimal_node = node_to_delete->right_son;
 		while (next_minimal_node->left_son != nullptr) {
 			next_minimal_node = next_minimal_node->left_son;
 		}
 		SwapNodes(*node_to_delete, *next_minimal_node);
-		// now node have maximum one son
-		Erase(key);
+	}
+
+	Node** father_to_son_pointer = GetFatherToSonLinkPointer(node_to_delete);
+	if (node_to_delete->left_son == nullptr && node_to_delete->right_son == nullptr) {
+		*father_to_son_pointer = nullptr;
+	}
+	else if (node_to_delete->left_son == nullptr) {
+		*father_to_son_pointer = node_to_delete->right_son;
+		node_to_delete->right_son->father = node_to_delete->father;
 	}
 	else {
-		if (node_to_delete->left_son == nullptr) {
-			*father_to_son_pointer = node_to_delete->right_son;
-			node_to_delete->right_son->father = node_to_delete->father;
-		}
-		else if (node_to_delete->right_son == nullptr) {
-			*father_to_son_pointer = node_to_delete->left_son;
-			node_to_delete->left_son->father = node_to_delete->father;
-		}
-		else {
-			*father_to_son_pointer = nullptr;
-		}
-
-		BalanceBottomTop(node_to_delete);
-
-		delete node_to_delete;
+		*father_to_son_pointer = node_to_delete->left_son;
+		node_to_delete->left_son->father = node_to_delete->father;
 	}
+
+	BalanceBottomTop(node_to_delete);
+
+	delete node_to_delete;
 }
 
 template<typename KeyType, typename ValueType>
