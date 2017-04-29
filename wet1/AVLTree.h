@@ -47,9 +47,8 @@ protected:
 	Node* last_searched_node;
 	int size;
 
-
-	typename AVLTree<KeyType, ValueType>::Node* Find_Recursive(KeyType const & key, Node* node);
-	typename AVLTree<KeyType, ValueType>::Node** GetFatherToSonLinkPointer(Node* son);
+	Node* Find_Recursive(KeyType const & key, Node* node);
+	Node** GetFatherToSonLinkPointer(Node* son);
 	void SwapNodes(Node& a, Node& b);
 	void Balance(Node* node);
 	void BalanceBottomTop(Node* bottom);
@@ -58,9 +57,11 @@ protected:
 	void RRRotation(Node * b);
 	void RLRotation(Node * b);
 	void DeleteRecursive(Node* node);
+	void AddToArrayRecursive(Node* node, Node** array, int* offset);
+	Node** TreeToArray();
 
 public:
-
+	AVLTree(Node** array, int size);
 	AVLTree() : root(nullptr), size(0) {};
 	~AVLTree() { DeleteRecursive(root); };
 	void Insert(KeyType const & key, ValueType const & value);
@@ -202,6 +203,25 @@ void AVLTree<KeyType, ValueType>::DeleteRecursive(Node * node)
 }
 
 template<typename KeyType, typename ValueType>
+void AVLTree<KeyType, ValueType>::AddToArrayRecursive(Node * node, Node ** array, int * offset)
+{
+	if (node == nullptr) return;
+	AddToArrayRecursive(node->left_son, array, offset);
+	*(array + *offset) = node;
+	*offset = *offset + 1;
+	AddToArrayRecursive(node->right_son, array, offset);
+}
+
+template<typename KeyType, typename ValueType>
+typename AVLTree<KeyType, ValueType>::Node ** AVLTree<KeyType, ValueType>::TreeToArray()
+{
+	Node** array = malloc(size * sizeof(Node*));
+	int offset = 0;
+	AddToArrayRecursive(root, array, &offset);
+	return array;
+}
+
+template<typename KeyType, typename ValueType>
 void AVLTree<KeyType, ValueType>::Insert(KeyType const & key, ValueType const & value)
 {
 	if (root == nullptr) {
@@ -228,7 +248,7 @@ void AVLTree<KeyType, ValueType>::Insert(KeyType const & key, ValueType const & 
 }
 
 template<typename KeyType, typename ValueType>
-inline void AVLTree<KeyType, ValueType>::Erase(KeyType const & key)
+void AVLTree<KeyType, ValueType>::Erase(KeyType const & key)
 {
 	Node* node_to_delete = Find_Recursive(key, root);
 	if (node_to_delete->left_son != nullptr && node_to_delete->right_son != nullptr) {
