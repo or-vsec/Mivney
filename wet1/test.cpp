@@ -24,7 +24,7 @@ int main() {
 	}
 	for (int i = 1000; i >= 0; i--) {
 		tree.Erase(i);
-		for (int j = 1000; j >i; j--) {
+		for (int j = 0; j <i; j++) {
 			tree.Find(j);
 		}
 	}
