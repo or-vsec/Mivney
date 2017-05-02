@@ -63,11 +63,10 @@ protected:
 	void RRRotation(Node * b);
 	void RLRotation(Node * b);
 
-	// Static Methods
 	static void DeleteRecursive(Node* node);
 
 	static Node** TreeToArray(const AVLTree& tree);
-	static AVLTree& ArrayToTree(Node** array, int size, int height);
+	AVLTree(Node** array, int size);
 	static void AddToArrayRecursive(Node* node, Node** array, int* offset);
 	static void AddFromArrayRecursive(Node* root, Node** array, int* offset);
 	static Node* CompleteTree(int height);
@@ -282,8 +281,9 @@ void AVLTree<KeyType, ValueType>::MinimizeCompleteTree(Node* node, int final_siz
 }
 
 template<typename KeyType, typename ValueType>
-AVLTree<KeyType, ValueType>& AVLTree<KeyType, ValueType>::ArrayToTree(Node ** array, int size, int height)
+AVLTree<KeyType, ValueType>::AVLTree(Node ** array, int size)
 {
+	int height = (int)floor(log2(size));
 	Node* blank_tree = CompleteTree(height);
 	int current_size = (int)pow(2, height + 1) - 1;
 	MinimizeCompleteTree(blank_tree, size, &current_size);
@@ -291,11 +291,8 @@ AVLTree<KeyType, ValueType>& AVLTree<KeyType, ValueType>::ArrayToTree(Node ** ar
 	int array_offset = 0;
 	AddFromArrayRecursive(blank_tree, array, &array_offset);
 	delete array;
-	AVLTree<KeyType, ValueType> tree = *new AVLTree();
-	tree.root = blank_tree;
-	tree.size = size;
-
-	return tree;
+	root = blank_tree;
+	size = size;
 }
 
 template<typename KeyType, typename ValueType>
