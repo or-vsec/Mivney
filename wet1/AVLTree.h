@@ -6,7 +6,7 @@
 class AVLTreeException {};
 class AVLTreeKeyNotFoundException : public AVLTreeException {};
 class AVLTreeKeyAlreadyExistsExpection : public AVLTreeException {};
-class AVLTreeAllocationFailedException : public AVLTreeException {};
+class AVLTreeIsEmpty : public AVLTreeException {};
 
 
 // Requirements: KeyType::opertor<,
@@ -47,6 +47,7 @@ protected:
 	// Members
 	Node* root;
 	Node* last_searched_node;
+	Node* biggest_node;
 	int size;
 
 	// Protected methods
@@ -63,6 +64,8 @@ protected:
 	void RRRotation(Node * b);
 	void RLRotation(Node * b);
 
+	void UpdateBiggest();
+
 	static void DeleteRecursive(Node* node);
 
 	static Node** TreeToArray(const AVLTree& tree);
@@ -74,10 +77,11 @@ protected:
 
 public:
 	// Public Methods
-	AVLTree() : root(nullptr), size(0) {};
+	AVLTree() : root(nullptr), size(0), biggest_node(nullptr) {};
 	~AVLTree() { DeleteRecursive(root); };
 	void Insert(KeyType const & key, ValueType const & value);
 	void Erase(KeyType const & key);
+	ValueType& Biggest();
 	ValueType& Find(KeyType const & key);
 	int Size() const { return size; }
 };
@@ -205,6 +209,15 @@ void AVLTree<KeyType, ValueType>::RLRotation(Node * b)
 }
 
 template<typename KeyType, typename ValueType>
+void AVLTree<KeyType, ValueType>::UpdateBiggest()
+{
+	biggest_node = root;
+	if (biggest_node != nullptr) {
+		while (biggest_node->right_son != nullptr) biggest_node = biggest_node->right_son;
+	}
+}
+
+template<typename KeyType, typename ValueType>
 void AVLTree<KeyType, ValueType>::DeleteRecursive(Node * node)
 {
 	if (node == nullptr) return;
@@ -293,6 +306,7 @@ AVLTree<KeyType, ValueType>::AVLTree(Node ** array, int size)
 	delete array;
 	root = blank_tree;
 	size = size;
+	UpdateBiggest();
 }
 
 template<typename KeyType, typename ValueType>
@@ -300,6 +314,7 @@ void AVLTree<KeyType, ValueType>::Insert(KeyType const & key, ValueType const & 
 {
 	if (root == nullptr) {
 		root = new Node(key, value);
+		biggest_node = root;
 		size++;
 		return;
 	}
@@ -318,6 +333,7 @@ void AVLTree<KeyType, ValueType>::Insert(KeyType const & key, ValueType const & 
 	}
 
 	BalanceBottomTop(new_node);
+	if (biggest_node->key < new_node->key) biggest_node = new_node;
 	size++;
 }
 
@@ -349,9 +365,18 @@ void AVLTree<KeyType, ValueType>::Erase(KeyType const & key)
 	if (node_to_delete->father != nullptr) {
 		BalanceBottomTop(node_to_delete);
 	}
-
+	if (biggest_node == node_to_delete) {
+		UpdateBiggest();
+	}
 	delete node_to_delete;
 	size--;
+}
+
+template<typename KeyType, typename ValueType>
+ValueType & AVLTree<KeyType, ValueType>::Biggest()
+{
+	if (biggest_node == nullptr) throw AVLTreeIsEmpty();
+	return biggest_node->value;
 }
 
 template<typename KeyType, typename ValueType>
