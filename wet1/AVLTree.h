@@ -24,17 +24,22 @@ public:
 		ArrayNode(KeyType const & key, ValueType const & value) : _key(key), _value(value) {}
 		ArrayNode() = default;
 	};
-
+	 
 	// Public Methods
+	// O(n)
 	~AVLTree() { delete_recursive(_root); };
-	AVLTree() : _root(nullptr), _size(0), _biggest(nullptr) {};
 	AVLTree(ArrayNode* array, int size);
 	static ArrayNode* tree_to_array(const AVLTree& tree);
+	// O(1)
+	AVLTree() : _root(nullptr), _size(0), _biggest(nullptr) {};
 
+	// O(log n)
 	void insert(KeyType const & key, ValueType const & value);
 	void erase(KeyType const & key);
-	ValueType& biggest() const;
 	ValueType& find(KeyType const & key);
+
+	// O(1)
+	ValueType& biggest() const;
 	int size() const { return _size; }
 
 protected:
@@ -73,23 +78,25 @@ protected:
 	int _size;
 
 	// Protected methods
+	// O(log n)
 	Node* find_recursion(KeyType const & key, Node* node);
+	void update_biggest();
 
+	// O(1)
 	Node** parent_to_son_link_pointer(Node const * const son);
-
 	void swap_nodes(Node& a, Node& b);
 
+	// O(log n)
 	void balance_bottom_up(Node* bottom);
+	// O(1)
 	void balance_node(Node* node);
 	void ll_rotation(Node * b);
 	void lr_rotation(Node * b);
 	void rr_rotation(Node * b);
 	void rl_rotation(Node * b);
 
-	void update_biggest();
-
+	// O(n)
 	static void delete_recursive(Node* node);
-
 	static void add_to_array_recursion(Node* node, ArrayNode* array, int* offset);
 	static void add_from_array_recursion(Node* root, ArrayNode* array, int* offset);
 	static Node* complete_tree(int height);
