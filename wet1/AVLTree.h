@@ -15,6 +15,28 @@ class AVLTreeIsEmpty : public AVLTreeException {};
 template<typename KeyType, typename ValueType>
 class AVLTree {
 
+public:
+
+	class ArrayNode {
+	public:
+		KeyType _key;
+		ValueType _value;
+		ArrayNode(KeyType const & key, ValueType const & value) : _key(key), _value(value) {}
+		ArrayNode() = default;
+	};
+
+	// Public Methods
+	~AVLTree() { delete_recursive(_root); };
+	AVLTree() : _root(nullptr), _size(0), _biggest(nullptr) {};
+	AVLTree(ArrayNode* array, int size);
+	static ArrayNode* tree_to_array(const AVLTree& tree);
+
+	void insert(KeyType const & key, ValueType const & value);
+	void erase(KeyType const & key);
+	ValueType& biggest() const;
+	ValueType& find(KeyType const & key);
+	int size() const { return _size; }
+
 protected:
 
 	class Node {
@@ -68,22 +90,10 @@ protected:
 
 	static void delete_recursive(Node* node);
 
-	static Node** tree_to_array(const AVLTree& tree);
-	AVLTree(Node** array, int size);
-	static void add_to_array_recursion(Node* node, Node** array, int* offset);
-	static void add_from_array_recursion(Node* root, Node** array, int* offset);
+	static void add_to_array_recursion(Node* node, ArrayNode* array, int* offset);
+	static void add_from_array_recursion(Node* root, ArrayNode* array, int* offset);
 	static Node* complete_tree(int height);
 	static void minimize_complete_tree(Node* root, int final_size, int *current_size);
-
-public:
-	// Public Methods
-	AVLTree() : _root(nullptr), _size(0), _biggest(nullptr) {};
-	~AVLTree() { delete_recursive(_root); };
-	void insert(KeyType const & key, ValueType const & value);
-	void erase(KeyType const & key);
-	ValueType& biggest() const;
-	ValueType& find(KeyType const & key);
-	int size() const { return _size; }
 };
 
 #endif    /*_AVLTREE_ */
@@ -227,21 +237,21 @@ void AVLTree<KeyType, ValueType>::delete_recursive(Node * node)
 }
 
 template<typename KeyType, typename ValueType>
-void AVLTree<KeyType, ValueType>::add_to_array_recursion(Node * node, Node ** array, int * offset)
+void AVLTree<KeyType, ValueType>::add_to_array_recursion(Node * node, ArrayNode* array, int * offset)
 {
 	if (node == nullptr) return;
 	add_to_array_recursion(node->_left_son, array, offset);
-	*(array + *offset) = node;
+	*(array + *offset) = ArrayNode(node->_key, node->_value);
 	*offset = *offset + 1;
 	add_to_array_recursion(node->_right_son, array, offset);
 }
 
 template<typename KeyType, typename ValueType>
-void AVLTree<KeyType, ValueType>::add_from_array_recursion(Node * node, Node ** array, int * offset)
+void AVLTree<KeyType, ValueType>::add_from_array_recursion(Node * node, ArrayNode* array, int * offset)
 {
 	if (node == nullptr) return;
 	add_from_array_recursion(node->_left_son, array, offset);
-	Node* array_node = *(array + *offset);
+	ArrayNode* array_node = (array + *offset);
 	node->_key = array_node->_key;
 	node->_value = array_node->_value;
 	*offset = *offset + 1;
@@ -249,9 +259,9 @@ void AVLTree<KeyType, ValueType>::add_from_array_recursion(Node * node, Node ** 
 }
 
 template<typename KeyType, typename ValueType>
-typename AVLTree<KeyType, ValueType>::Node ** AVLTree<KeyType, ValueType>::tree_to_array(const AVLTree<KeyType, ValueType>& tree)
+typename AVLTree<KeyType, ValueType>::ArrayNode* AVLTree<KeyType, ValueType>::tree_to_array(const AVLTree<KeyType, ValueType>& tree)
 {
-	Node** array = new Node*[tree._size];
+	ArrayNode* array = new ArrayNode[tree._size];
 	int offset = 0;
 	add_to_array_recursion(tree._root, array, &offset);
 	return array;
@@ -294,7 +304,7 @@ void AVLTree<KeyType, ValueType>::minimize_complete_tree(Node* node, int final_s
 }
 
 template<typename KeyType, typename ValueType>
-AVLTree<KeyType, ValueType>::AVLTree(Node ** array, int size)
+AVLTree<KeyType, ValueType>::AVLTree(ArrayNode* array, int size)
 {
 	int height = (int)floor(log2(size));
 	Node* blank_tree = complete_tree(height);
