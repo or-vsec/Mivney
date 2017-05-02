@@ -336,9 +336,6 @@ void AVLTree<KeyType, ValueType>::Erase(KeyType const & key)
 		SwapNodes(*node_to_delete, *next_minimal_node);
 	} 
 
-	node_to_delete->height = -1;
-	BalanceBottomTop(node_to_delete);
-
 	Node** father_to_son_pointer = GetFatherToSonLinkPointer(node_to_delete);
 	if (node_to_delete->left_son == nullptr && node_to_delete->right_son == nullptr) {
 		*father_to_son_pointer = nullptr;
@@ -350,6 +347,10 @@ void AVLTree<KeyType, ValueType>::Erase(KeyType const & key)
 	else {
 		*father_to_son_pointer = node_to_delete->left_son;
 		node_to_delete->left_son->father = node_to_delete->father;
+	}
+
+	if (node_to_delete->father != nullptr) {
+		BalanceBottomTop(node_to_delete);
 	}
 
 	delete node_to_delete;
