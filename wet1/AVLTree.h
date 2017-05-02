@@ -53,7 +53,7 @@ protected:
 	// Protected methods
 	Node* Find_Recursive(KeyType const & key, Node* node);
 
-	Node** GetFatherToSonLinkPointer(Node* son);
+	Node** GetFatherToSonLinkPointer(Node const * const son);
 
 	void SwapNodes(Node& a, Node& b);
 
@@ -81,7 +81,7 @@ public:
 	~AVLTree() { DeleteRecursive(root); };
 	void Insert(KeyType const & key, ValueType const & value);
 	void Erase(KeyType const & key);
-	ValueType& Biggest();
+	ValueType& Biggest() const;
 	ValueType& Find(KeyType const & key);
 	int Size() const { return size; }
 };
@@ -100,7 +100,7 @@ typename AVLTree<KeyType, ValueType>::Node* AVLTree<KeyType, ValueType>::Find_Re
 }
 
 template<typename KeyType, typename ValueType>
-typename AVLTree<KeyType, ValueType>::Node ** AVLTree<KeyType, ValueType>::GetFatherToSonLinkPointer(Node * son)
+typename AVLTree<KeyType, ValueType>::Node ** AVLTree<KeyType, ValueType>::GetFatherToSonLinkPointer(Node const * const son)
 {
 	if (son->father == nullptr) return &root;
 	if (son->father->left_son == son) {
@@ -373,7 +373,7 @@ void AVLTree<KeyType, ValueType>::Erase(KeyType const & key)
 }
 
 template<typename KeyType, typename ValueType>
-ValueType & AVLTree<KeyType, ValueType>::Biggest()
+ValueType & AVLTree<KeyType, ValueType>::Biggest() const
 {
 	if (biggest_node == nullptr) throw AVLTreeIsEmpty();
 	return biggest_node->value;
