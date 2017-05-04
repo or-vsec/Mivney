@@ -10,20 +10,23 @@ public:
 	int id;
 	int grade;
 	int power;
+	long long power_id;
 	Team* team;
+	void update_power_id() {
+		power_id = id + power * sizeof(int);
+	}
 };
 
 class Team {
 public:
 	int id;
-	AVLTree<int, Mutant*> mutants; //Sorted by power;
-	Mutant* most_powerful;
+	AVLTree<long long, Mutant*> mutants; //Sorted by power;
 };
 
 class School {
-	AVLTree<int, Mutant&> mutants_by_id;
-	AVLTree<int, Mutant*> mutants_by_power;
-	AVLTree<int, Team&> teams;
+	AVLTree<int, Mutant> mutants_by_id;
+	AVLTree<long long, Mutant*> mutants_by_power;
+	AVLTree<int, Team> teams;
 };
 
 #endif
