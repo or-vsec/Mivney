@@ -27,6 +27,8 @@ class Team {
 public:
 	int id;
 	AVLTree<long long, Mutant*> mutants; //Sorted by power;
+	Team(int id) : id(id) {}
+	
 };
 
 class School {
@@ -34,8 +36,16 @@ class School {
 	AVLTree<long long, Mutant*> mutants_by_power;
 	AVLTree<int, Team> teams;
 public:
+	//School init();
 	StatusType add_student(int student_id, int grade, int power);
-	StatusType IncreaseLevel(int grade, int power_increase);
+	StatusType add_team(int TeamID);
+	StatusType move_student_to_team(int StudentID, int TeamID);
+	StatusType get_most_powerful(int TeamID, int *StudentID);
+	StatusType remove_student(int StudentID);
+	StatusType increase_level(int Grade, int PowerIncrease);
+	StatusType get_all_students_by_power(int TeamID, int **Students, int *numOfStudents);
+	void quit();
+
 };
 
 #endif
