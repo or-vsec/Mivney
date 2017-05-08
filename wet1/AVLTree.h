@@ -104,7 +104,6 @@ protected:
 	static void minimize_complete_tree(Node* root, int final_size, int *current_size);
 };
 
-#endif    /*_AVLTREE_ */
 
 
 template<typename KeyType, typename ValueType>
@@ -402,3 +401,5 @@ ValueType& AVLTree<KeyType, ValueType>::find(KeyType const & key)
 {
 	return find_recursion(key, _root)->_value;
 }
+
+#endif    /*_AVLTREE_ */
