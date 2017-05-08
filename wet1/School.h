@@ -7,33 +7,47 @@
 
 class Team;
 
+class PowerID {
+	int id;
+	int power;
+public:
+	PowerID() = default;
+	PowerID(int id, int power) : id(id), power(power) {}
+	bool operator==(const PowerID& rhs) const {
+		return id == rhs.id && power == rhs.power;
+	}
+	bool operator<(const PowerID& rhs) const {
+		if (power == rhs.power) {
+			return id > rhs.id;
+		}
+		return power < rhs.power;
+	}
+	PowerID& operator=(int power)
+	{
+		this->power = power;
+		return *this;
+	}
+};
+
 class Mutant {
 public:
-
 	int id;
 	int grade;
-	int power;
-	long long power_id;
+	PowerID power;
 	Team* team;
-	void update_power_id() {
-		power_id = id + power * sizeof(int);
-	}
-	Mutant(int id, int grade, int power) : id(id), grade(grade), power(power) {
-		update_power_id();
-	}
+	Mutant(int id, int grade, int power) : id(id), grade(grade), power(id, power) {}
 };
 
 class Team {
 public:
 	int id;
-	AVLTree<long long, Mutant*> mutants; //Sorted by power;
+	AVLTree<PowerID, Mutant*> mutants; //Sorted by power;
 	Team(int id) : id(id) {}
-	
 };
 
 class School {
 	AVLTree<int, Mutant*> mutants_by_id;
-	AVLTree<long long, Mutant*> mutants_by_power;
+	AVLTree<PowerID, Mutant*> mutants_by_power;
 	AVLTree<int, Team> teams;
 public:
 	//School init();
