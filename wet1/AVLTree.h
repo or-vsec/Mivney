@@ -22,8 +22,8 @@ public:
 	public:
 		KeyType _key;
 		ValueType _value;
-		ArrayNode(KeyType const & key, ValueType const & value) : _key(key), _value(value) {}
 		ArrayNode() = default;
+		ArrayNode(KeyType const & key, ValueType const & value) : _key(key), _value(value) {}
 	};
 	 
 	// Public Methods

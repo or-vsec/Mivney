@@ -48,6 +48,7 @@ public:
 	int id;
 	AVLTree<PowerID, Mutant*> mutants; //Sorted by power;
 	Team(int id) : id(id) {}
+	Team() = default;
 };
 
 class School {
