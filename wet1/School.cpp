@@ -17,6 +17,10 @@ StatusType School::add_student(int student_id, int grade, int power) {
 		delete new_mutant;
 		return ALLOCATION_ERROR;
 	}
+	catch (AVLTreeKeyAlreadyExistsExpection) {
+		delete new_mutant;
+		return FAILURE;
+	}
 	try {
 		mutants_by_power.insert(new_mutant->power, new_mutant);
 	}
