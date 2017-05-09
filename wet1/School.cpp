@@ -206,8 +206,9 @@ StatusType School::increase_level(int Grade, int PowerIncrease){
 	if (Grade < 0 || PowerIncrease <= 0) return INVALID_INPUT;
 	if( merge(mutants_by_power, Grade, PowerIncrease)== ALLOCATION_ERROR)
 			return ALLOCATION_ERROR;
+	AVLTree<int, Team>::ArrayNode* team_array;
 	try {
-		AVLTree<int, Team>::ArrayNode* team_array = AVLTree<int, Team>::tree_to_array(teams);
+		 team_array = AVLTree<int, Team>::tree_to_array(teams);
 		}
 	catch (std::bad_alloc) {
 		return ALLOCATION_ERROR;
@@ -226,7 +227,7 @@ void School::quit(){
 		}
 		AVLTree<int, Team>::ArrayNode* teams_array = AVLTree<int, Team>::tree_to_array(teams);
 		for (int i = 0; i < teams.size(); i++) {
-			delete (teams_array[i]._value);
+			delete &(teams_array[i]._value);
 		}
 		delete this;
 }
