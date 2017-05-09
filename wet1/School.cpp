@@ -199,26 +199,22 @@ static StatusType merge(AVLTree<long long, Mutant*> mutants, int Grade, int Powe
 		catch (std::bad_alloc) {
 			return ALLOCATION_ERROR;
 		}
-		return SUCCESS;///////////??????????
+		return SUCCESS;
 }
 
 StatusType School::increase_level(int Grade, int PowerIncrease){
 	if (Grade < 0 || PowerIncrease <= 0) return INVALID_INPUT;
-	
-	try {
-		merge(mutants_by_power, Grade, PowerIncrease);
-		}
-	catch (std::bad_alloc) {
+	if( merge(mutants_by_power, Grade, PowerIncrease)== ALLOCATION_ERROR)
 			return ALLOCATION_ERROR;
-	}
 	try {
 		AVLTree<int, Team>::ArrayNode* team_array = AVLTree<int, Team>::tree_to_array(teams);
-		for (int i = 0; i < teams.size(); i++)
-			merge(team_array[i]._value.mutants, Grade, 0);
-	}
+		}
 	catch (std::bad_alloc) {
 		return ALLOCATION_ERROR;
 	}
+	for (int i = 0; i < teams.size(); i++)
+		if(merge(team_array[i]._value.mutants, Grade, 0)== ALLOCATION_ERROR)
+			return ALLOCATION_ERROR;
 	return SUCCESS;
 }
 
