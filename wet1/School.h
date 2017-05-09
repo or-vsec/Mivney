@@ -52,11 +52,13 @@ public:
 };
 
 class School {
+
 	AVLTree<int, Mutant*> mutants_by_id;
 	AVLTree<PowerID, Mutant*> mutants_by_power;
 	AVLTree<int, Team> teams;
+
 public:
-	//School init();
+
 	StatusType add_student(int student_id, int grade, int power);
 	StatusType add_team(int TeamID);
 	StatusType move_student_to_team(int StudentID, int TeamID);
@@ -64,7 +66,8 @@ public:
 	StatusType remove_student(int StudentID);
 	StatusType increase_level(int Grade, int PowerIncrease);
 	StatusType get_all_students_by_power(int TeamID, int **Students, int *numOfStudents);
-	void quit();
+	~School();
+	School() = default;
 
 };
 

@@ -14,22 +14,15 @@ StatusType School::add_student(int student_id, int grade, int power) {
 		mutants_by_id.insert(new_mutant->id, new_mutant);
 	}
 	catch (std::bad_alloc) {
+		delete new_mutant;
 		return ALLOCATION_ERROR;
 	}
 	try {
 		mutants_by_power.insert(new_mutant->power, new_mutant);
 	}
 	catch (std::bad_alloc) {
-		return ALLOCATION_ERROR;
-	}
-	try{
-		Team team0find = teams.find(0);
-		team0find.mutants.insert(new_mutant->power, new_mutant);
-	}
-	catch (AVLTreeKeyAlreadyExistsExpection) {
-		return FAILURE;
-	}
-	catch (std::bad_alloc) {
+		mutants_by_id.erase(new_mutant->id);
+		delete new_mutant;
 		return ALLOCATION_ERROR;
 	}
 	return SUCCESS;
@@ -38,9 +31,8 @@ StatusType School::add_student(int student_id, int grade, int power) {
 StatusType School::add_team(int TeamID) {
 	if (TeamID <= 0) return INVALID_INPUT;
 	try {
-		Team* new_team = new Team (TeamID);
-		teams.insert(TeamID, *new_team);
-		}
+		teams.insert(TeamID, Team(TeamID));
+	}
 	catch (std::bad_alloc) {
 		return ALLOCATION_ERROR;
 	}
@@ -54,42 +46,37 @@ StatusType School::move_student_to_team(int StudentID, int TeamID) {
 	if (StudentID <= 0 || TeamID <= 0) return INVALID_INPUT;
 	try {
 		Mutant* mut = mutants_by_id.find(StudentID);
+		Team* toteam = &teams.find(TeamID);
 		Team* fromteam = mut->team;
-		Team toteam = teams.find(TeamID);
+		toteam->mutants.insert(mut->power, mut);
+		if (fromteam != NULL) {
+			fromteam->mutants.erase(mut->power);
+		}
+		mut->team = toteam;
 	}
-	catch (AVLTreeKeyNotFoundException) {
+	catch (AVLTreeKeyNotFoundException) { //find failed
 		return FAILURE;
 	}
-	Mutant* mut = mutants_by_id.find(StudentID);
-	Team* fromteam = mut->team;
-	Team toteam = teams.find(TeamID);
-	try {
-		toteam.mutants.insert(mut->power, mut);
-	}
-	catch (std::bad_alloc) {
+	catch (std::bad_alloc) { // insert failed
 		return ALLOCATION_ERROR;
 	}
-	fromteam->mutants.erase(mut->power); //what if insert fail? can i do try in try?
-	mut->team = &toteam;
 	return SUCCESS;
 }
 
 StatusType School::get_most_powerful(int TeamID, int *StudentID) {
-	if ((StudentID == NULL)||(TeamID==0)) return INVALID_INPUT;
+	if ((StudentID == NULL) || (TeamID == 0)) return INVALID_INPUT;
 	try {
-		if (TeamID > 0)
-			Team team = teams.find(TeamID);
+		if (TeamID < 0) {
+			*StudentID = mutants_by_power.biggest()->id;
+		}
+		else {
+			*StudentID = teams.find(TeamID).mutants.biggest()->id;
+		}
 	}
 	catch (AVLTreeKeyNotFoundException) {
 		return FAILURE;
 	}
-	try {
-		if (TeamID < 0)
-			*StudentID = (mutants_by_power.biggest())->id;
-		else 
-			*StudentID = ((teams.find(TeamID)).mutants.biggest())->id;
-	}
-	catch (AVLTreeKeyNotFoundException) {
+	catch (AVLTreeIsEmpty) {
 		*StudentID = -1;
 	}
 	return SUCCESS;
@@ -99,70 +86,55 @@ StatusType School::remove_student(int StudentID) {
 	if (StudentID <= 0) return INVALID_INPUT;
 	try {
 		Mutant* mut = mutants_by_id.find(StudentID);
-	}
-		catch (AVLTreeKeyNotFoundException) {
-			return FAILURE;
-		}
-		Mutant* mut = mutants_by_id.find(StudentID);
-		Team* fromteam = mut->team;
-		fromteam->mutants.erase(mut->power);
+		Team* team = mut->team;
+		team->mutants.erase(mut->power);
 		mutants_by_power.erase(mut->power);
 		mutants_by_id.erase(StudentID);
-		return SUCCESS;
-	}
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-StatusType School::get_all_students_by_power(int TeamID, int **Students, int *numOfStudents) {
-	if (TeamID == 0) return INVALID_INPUT;
-	try {
-		if (TeamID > 0)
-			Team team = teams.find(TeamID);
+		delete mut;
 	}
 	catch (AVLTreeKeyNotFoundException) {
 		return FAILURE;
 	}
-	if (TeamID < 0) {
-		*numOfStudents = mutants_by_power.size();
-		if (*numOfStudents == 0) {
-			**Students = NULL;
-			return SUCCESS;
+	return SUCCESS;
+}
+
+StatusType School::get_all_students_by_power(int TeamID, int **Students, int *numOfStudents) {
+	if (TeamID == 0 || Students==NULL || numOfStudents == NULL) return INVALID_INPUT;
+	try {
+		AVLTree<PowerID, Mutant*>* mutants_tree;
+		if (TeamID < 0) {
+			mutants_tree = &mutants_by_power;
 		}
 		else {
-			try {
-				AVLTree<PowerID, Mutant*>::ArrayNode* mutants_array = AVLTree<PowerID, Mutant*>::tree_to_array(mutants_by_power);
-				*Students = new int[*numOfStudents]; 
-				for (int i = 0; i < (*numOfStudents); i++) {
-					*Students[i] = mutants_array[i]._value->id;
-					}
-			}
-			catch (std::bad_alloc) {
-				return ALLOCATION_ERROR;
-			}
-			return SUCCESS;
+			mutants_tree = &teams.find(TeamID).mutants;
 		}
-	}
-	else {
-		Team team = teams.find(TeamID);
-		*numOfStudents = team.mutants.size();
-		if (*numOfStudents == 0) {
-			**Students = NULL;
-			return SUCCESS;
-		}
-		else {
-			try {
-				AVLTree<PowerID, Mutant*>::ArrayNode* mutants_array = AVLTree<PowerID, Mutant*>::tree_to_array(team.mutants);
-				*Students = new int[*numOfStudents];
-				for (int i = 0; i < (*numOfStudents); i++) {
-					*Students[i] = mutants_array[i]._value->id;
+			*numOfStudents = mutants_tree->size();
+			if (*numOfStudents == 0) {
+				**Students = NULL;
+				return SUCCESS;
+			}
+			else {
+				AVLTree<PowerID, Mutant*>::ArrayNode* mutants_array = AVLTree<PowerID, Mutant*>::tree_to_array(*mutants_tree);
+				*Students = (int*)malloc(*numOfStudents * sizeof(int));
+				if (*Students == NULL) {
+					delete mutants_array;
+					return ALLOCATION_ERROR;
 				}
+				for (int i = 0; i < (*numOfStudents); i++) {
+					(*Students)[(*numOfStudents)-i-1] = mutants_array[i]._value->id; // added reversed because tree is built from weakest to strongest
+				}
+				delete mutants_array;
 			}
-			catch (std::bad_alloc) {
-				return ALLOCATION_ERROR;
-			}
-			return SUCCESS;
-		}
+	}
+	catch (std::bad_alloc) {
+		return ALLOCATION_ERROR;
+	}
+	catch (AVLTreeKeyNotFoundException) {
+		return FAILURE;
 	}
 	return SUCCESS;
 }
+
 static StatusType merge(AVLTree<PowerID, Mutant*> mutants, int Grade, int PowerIncrease) {
 	AVLTree<PowerID, Mutant*>::ArrayNode* mutants_array = AVLTree<PowerID, Mutant*>::tree_to_array(mutants);
 	try {
@@ -223,15 +195,9 @@ StatusType School::increase_level(int Grade, int PowerIncrease){
 }
 
 
-void School::quit(){
-	
-		AVLTree<PowerID, Mutant*>::ArrayNode* mutants_array = AVLTree<PowerID, Mutant*>::tree_to_array(mutants_by_power);
-		for (int i = 0; i < mutants_by_power.size(); i++) {
-			mutants_by_id.erase(mutants_array[i]._value->id);
+School::~School() {
+		AVLTree<int, Mutant*>::ArrayNode* mutants_array = AVLTree<int, Mutant*>::tree_to_array(mutants_by_id);
+		for (int i = 0; i < mutants_by_id.size(); i++) {
+			delete mutants_array[i]._value;
 		}
-		AVLTree<int, Team>::ArrayNode* teams_array = AVLTree<int, Team>::tree_to_array(teams);
-		for (int i = 0; i < teams.size(); i++) {
-			teams.erase(teams_array[i]._value.id);
-		}
-	
 }

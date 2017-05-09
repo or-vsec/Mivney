@@ -43,8 +43,8 @@ StatusType IncreaseLevel(void *DS, int Grade, int PowerIncrease) {
 	return ((School*)DS)->increase_level(Grade, PowerIncrease);
 }
 
-////////tbd
 void Quit(void** DS) {
-	((School*)DS)->quit();
-	return;
+	if (DS == NULL) return;
+	delete ((School*)DS);
+	*DS = NULL;
 }
