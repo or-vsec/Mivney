@@ -195,6 +195,9 @@ static StatusType merge(AVLTree<PowerID, Mutant*> mutants, int Grade, int PowerI
 			}
 		}
 		AVLTree<PowerID, Mutant*> mutants_by_power(mutants_array, mutants.size());
+		delete *same_grade_mutants;
+		delete *diff_grade_mutants;
+
 	}
 		catch (std::bad_alloc) {
 			return ALLOCATION_ERROR;
@@ -220,16 +223,15 @@ StatusType School::increase_level(int Grade, int PowerIncrease){
 }
 
 
-void School::quit(){/*
-	AVLTree<int, Team>::ArrayNode* teams_array = AVLTree<int, Team>::tree_to_array(teams);
-	for (int i = 0; i < teams.size(); i++) {
-		//delete (teams_array[i]._value);
-	}
+void School::quit(){
+	
 		AVLTree<PowerID, Mutant*>::ArrayNode* mutants_array = AVLTree<PowerID, Mutant*>::tree_to_array(mutants_by_power);
 		for (int i = 0; i < mutants_by_power.size(); i++) {
-			delete mutants_array[i]._value;
+			mutants_by_id.erase(mutants_array[i]._value->id);
 		}
-		
-	//	delete this;
-	*/
+		AVLTree<int, Team>::ArrayNode* teams_array = AVLTree<int, Team>::tree_to_array(teams);
+		for (int i = 0; i < teams.size(); i++) {
+			teams.erase(teams_array[i]._value.id);
+		}
+	
 }
