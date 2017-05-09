@@ -129,7 +129,10 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 		else {
 			try {
 				AVLTree<long long, Mutant*>::ArrayNode* mutants_array = AVLTree<long long, Mutant*>::tree_to_array(mutants_by_power);
-				**Students = malloc(*numOfStudents*(sizeof(int*))); /////////////////////???? 'what type do I return?
+				*Students = new int[*numOfStudents]; 
+				for (int i = 0; i < (*numOfStudents); i++) {
+					*Students[i] = mutants_array[i]._value->id;
+					}
 			}
 			catch (std::bad_alloc) {
 				return ALLOCATION_ERROR;
@@ -147,7 +150,10 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 		else {
 			try {
 				AVLTree<long long, Mutant*>::ArrayNode* mutants_array = AVLTree<long long, Mutant*>::tree_to_array(team.mutants);
-				*Students = malloc(*numOfStudents*(sizeof(int*))); /////////////////////???? 'what type do I return?
+				*Students = new int[*numOfStudents];
+				for (int i = 0; i < (*numOfStudents); i++) {
+					*Students[i] = mutants_array[i]._value->id;
+				}
 			}
 			catch (std::bad_alloc) {
 				return ALLOCATION_ERROR;
@@ -157,34 +163,74 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 	}
 	return SUCCESS;
 }
+static StatusType merge(AVLTree<long long, Mutant*> mutants, int Grade, int PowerIncrease) {
+	AVLTree<long long, Mutant*>::ArrayNode* mutants_array = AVLTree<long long, Mutant*>::tree_to_array(mutants);
+	try {
+		Mutant** same_grade_mutants = new Mutant*[mutants.size()];
+		Mutant** diff_grade_mutants = new Mutant*[mutants.size()];
+		int cnt_same = 0;
+		int cnt_diff = 0;
+		for (int i = 0; i < mutants.size(); i++) {
+			if (mutants_array[i]._value->grade == Grade) {
+				same_grade_mutants[cnt_same] = mutants_array[i]._value;
+				same_grade_mutants[cnt_same]->power += PowerIncrease;
+				same_grade_mutants[cnt_same]->update_power_id();
+				cnt_same++;
+			}
+			else {
+				diff_grade_mutants[cnt_diff] = mutants_array[i]._value;
+				cnt_diff++;
+			}
+		}
+		int ind_same = 0;
+		int ind_diff = 0;
+		for (int i = 0; i < mutants.size(); i++) {
+			if ((same_grade_mutants[ind_same]->power_id < diff_grade_mutants[ind_diff]->power_id) || (ind_diff == cnt_diff)) {
+				mutants_array[i]._value = same_grade_mutants[ind_same];
+				ind_same++;
+			}
+			else {
+				mutants_array[i]._value = diff_grade_mutants[ind_diff];
+				ind_diff++;
+			}
+		}
+		AVLTree<long long, Mutant*> mutants_by_power(mutants_array, mutants.size());
+	}
+		catch (std::bad_alloc) {
+			return ALLOCATION_ERROR;
+		}
+		return SUCCESS;///////////??????????
+}
 
 StatusType School::increase_level(int Grade, int PowerIncrease){
 	if (Grade < 0 || PowerIncrease <= 0) return INVALID_INPUT;
-	AVLTree<long long, Mutant*>::ArrayNode* mutants_array = AVLTree<long long, Mutant*>::tree_to_array(mutants_by_power);
+	
 	try {
-		Mutant** same_grade_mutants = new Mutant*[mutants_by_power.size()];
-		Mutant** diff_grade_mutants = new Mutant*[mutants_by_power.size()];
-		for (int i = 0; i < mutants_by_power.size(); i++) {
-			if (mutants_array[i]._value->grade == Grade) {
-				same_grade_mutants[i] = mutants_array[i]._value;
-				same_grade_mutants[i]->power += PowerIncrease;
-				same_grade_mutants[i]->update_power_id();
-			}
-			else {
-				diff_grade_mutants[i] = mutants_array[i]._value;
-			}
+		merge(mutants_by_power, Grade, PowerIncrease);
 		}
-		/////whats the balance function name?
-	}
 	catch (std::bad_alloc) {
 			return ALLOCATION_ERROR;
+	}
+	try {
+		AVLTree<int, Team>::ArrayNode* team_array = AVLTree<int, Team>::tree_to_array(teams);
+		for (int i = 0; i < teams.size(); i++)
+			merge(team_array[i]._value.mutants, Grade, 0);
+	}
+	catch (std::bad_alloc) {
+		return ALLOCATION_ERROR;
 	}
 	return SUCCESS;
 }
 
-///////tbd
-void School::quit(){
-	delete this*.mutants_by_id;
-	delete 
 
+void School::quit(){
+		AVLTree<long long, Mutant*>::ArrayNode* mutants_array = AVLTree<long long, Mutant*>::tree_to_array(mutants_by_power);
+		for (int i = 0; i < mutants_by_power.size(); i++) {
+			delete mutants_array[i]._value;
+		}
+		AVLTree<int, Team>::ArrayNode* teams_array = AVLTree<int, Team>::tree_to_array(teams);
+		for (int i = 0; i < teams.size(); i++) {
+			delete (teams_array[i]._value);
+		}
+		delete this;
 }
