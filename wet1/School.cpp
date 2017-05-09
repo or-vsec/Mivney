@@ -17,14 +17,14 @@ StatusType School::add_student(int student_id, int grade, int power) {
 		return ALLOCATION_ERROR;
 	}
 	try {
-		mutants_by_power.insert(new_mutant->power_id, new_mutant);
+		mutants_by_power.insert(new_mutant->power, new_mutant);
 	}
 	catch (std::bad_alloc) {
 		return ALLOCATION_ERROR;
 	}
 	try{
 		Team team0find = teams.find(0);
-		team0find.mutants.insert(new_mutant->power_id, new_mutant);
+		team0find.mutants.insert(new_mutant->power, new_mutant);
 	}
 	catch (AVLTreeKeyAlreadyExistsExpection) {
 		return FAILURE;
@@ -64,12 +64,12 @@ StatusType School::move_student_to_team(int StudentID, int TeamID) {
 	Team* fromteam = mut->team;
 	Team toteam = teams.find(TeamID);
 	try {
-		toteam.mutants.insert(mut->power_id, mut);
+		toteam.mutants.insert(mut->power, mut);
 	}
 	catch (std::bad_alloc) {
 		return ALLOCATION_ERROR;
 	}
-	fromteam->mutants.erase(mut->power_id); //what if insert fail? can i do try in try?
+	fromteam->mutants.erase(mut->power); //what if insert fail? can i do try in try?
 	mut->team = &toteam;
 	return SUCCESS;
 }
@@ -105,8 +105,8 @@ StatusType School::remove_student(int StudentID) {
 		}
 		Mutant* mut = mutants_by_id.find(StudentID);
 		Team* fromteam = mut->team;
-		fromteam->mutants.erase(mut->power_id);
-		mutants_by_power.erase(mut->power_id);
+		fromteam->mutants.erase(mut->power);
+		mutants_by_power.erase(mut->power);
 		mutants_by_id.erase(StudentID);
 		return SUCCESS;
 	}
@@ -128,7 +128,7 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 		}
 		else {
 			try {
-				AVLTree<long long, Mutant*>::ArrayNode* mutants_array = AVLTree<long long, Mutant*>::tree_to_array(mutants_by_power);
+				AVLTree<PowerID, Mutant*>::ArrayNode* mutants_array = AVLTree<PowerID, Mutant*>::tree_to_array(mutants_by_power);
 				*Students = new int[*numOfStudents]; 
 				for (int i = 0; i < (*numOfStudents); i++) {
 					*Students[i] = mutants_array[i]._value->id;
@@ -149,7 +149,7 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 		}
 		else {
 			try {
-				AVLTree<long long, Mutant*>::ArrayNode* mutants_array = AVLTree<long long, Mutant*>::tree_to_array(team.mutants);
+				AVLTree<PowerID, Mutant*>::ArrayNode* mutants_array = AVLTree<PowerID, Mutant*>::tree_to_array(team.mutants);
 				*Students = new int[*numOfStudents];
 				for (int i = 0; i < (*numOfStudents); i++) {
 					*Students[i] = mutants_array[i]._value->id;
@@ -163,8 +163,8 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 	}
 	return SUCCESS;
 }
-static StatusType merge(AVLTree<long long, Mutant*> mutants, int Grade, int PowerIncrease) {
-	AVLTree<long long, Mutant*>::ArrayNode* mutants_array = AVLTree<long long, Mutant*>::tree_to_array(mutants);
+static StatusType merge(AVLTree<PowerID, Mutant*> mutants, int Grade, int PowerIncrease) {
+	AVLTree<PowerID, Mutant*>::ArrayNode* mutants_array = AVLTree<PowerID, Mutant*>::tree_to_array(mutants);
 	try {
 		Mutant** same_grade_mutants = new Mutant*[mutants.size()];
 		Mutant** diff_grade_mutants = new Mutant*[mutants.size()];
@@ -173,8 +173,8 @@ static StatusType merge(AVLTree<long long, Mutant*> mutants, int Grade, int Powe
 		for (int i = 0; i < mutants.size(); i++) {
 			if (mutants_array[i]._value->grade == Grade) {
 				same_grade_mutants[cnt_same] = mutants_array[i]._value;
-				same_grade_mutants[cnt_same]->power += PowerIncrease;
-				same_grade_mutants[cnt_same]->update_power_id();
+				same_grade_mutants[cnt_same]->power +=PowerIncrease;
+				//same_grade_mutants[cnt_same]->update_power();
 				cnt_same++;
 			}
 			else {
@@ -185,7 +185,7 @@ static StatusType merge(AVLTree<long long, Mutant*> mutants, int Grade, int Powe
 		int ind_same = 0;
 		int ind_diff = 0;
 		for (int i = 0; i < mutants.size(); i++) {
-			if ((same_grade_mutants[ind_same]->power_id < diff_grade_mutants[ind_diff]->power_id) || (ind_diff == cnt_diff)) {
+			if ((same_grade_mutants[ind_same]->power < diff_grade_mutants[ind_diff]->power) || (ind_diff == cnt_diff)) {
 				mutants_array[i]._value = same_grade_mutants[ind_same];
 				ind_same++;
 			}
@@ -194,7 +194,7 @@ static StatusType merge(AVLTree<long long, Mutant*> mutants, int Grade, int Powe
 				ind_diff++;
 			}
 		}
-		AVLTree<long long, Mutant*> mutants_by_power(mutants_array, mutants.size());
+		AVLTree<PowerID, Mutant*> mutants_by_power(mutants_array, mutants.size());
 	}
 		catch (std::bad_alloc) {
 			return ALLOCATION_ERROR;
@@ -220,14 +220,16 @@ StatusType School::increase_level(int Grade, int PowerIncrease){
 }
 
 
-void School::quit(){
-		AVLTree<long long, Mutant*>::ArrayNode* mutants_array = AVLTree<long long, Mutant*>::tree_to_array(mutants_by_power);
+void School::quit(){/*
+	AVLTree<int, Team>::ArrayNode* teams_array = AVLTree<int, Team>::tree_to_array(teams);
+	for (int i = 0; i < teams.size(); i++) {
+		//delete (teams_array[i]._value);
+	}
+		AVLTree<PowerID, Mutant*>::ArrayNode* mutants_array = AVLTree<PowerID, Mutant*>::tree_to_array(mutants_by_power);
 		for (int i = 0; i < mutants_by_power.size(); i++) {
 			delete mutants_array[i]._value;
 		}
-		AVLTree<int, Team>::ArrayNode* teams_array = AVLTree<int, Team>::tree_to_array(teams);
-		for (int i = 0; i < teams.size(); i++) {
-			delete &(teams_array[i]._value);
-		}
-		delete this;
+		
+	//	delete this;
+	*/
 }

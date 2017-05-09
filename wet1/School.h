@@ -27,6 +27,11 @@ public:
 		this->power = power;
 		return *this;
 	}
+	PowerID& operator+=(int power)
+	{
+		this->power += power;
+		return *this;
+	}
 };
 
 class Mutant {
