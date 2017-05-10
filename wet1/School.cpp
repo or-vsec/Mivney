@@ -122,6 +122,7 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 				*Students = (int*)malloc(*numOfStudents * sizeof(int));
 				if (*Students == NULL) {
 					delete mutants_array;
+					*numOfStudents = 0;
 					return ALLOCATION_ERROR;
 				}
 				for (int i = 0; i < (*numOfStudents); i++) {
@@ -131,6 +132,7 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 			}
 	}
 	catch (std::bad_alloc) {
+		*numOfStudents = 0;
 		return ALLOCATION_ERROR;
 	}
 	catch (AVLTreeKeyNotFoundException) {
@@ -204,4 +206,5 @@ School::~School() {
 		for (int i = 0; i < mutants_by_id.size(); i++) {
 			delete mutants_array[i]._value;
 		}
+		delete mutants_array;
 }
