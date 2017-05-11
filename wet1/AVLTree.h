@@ -248,7 +248,9 @@ void AVLTree<KeyType, ValueType>::add_to_array_recursion(Node * node, ArrayNode*
 {
 	if (node == NULL) return;
 	add_to_array_recursion(node->_left_son, array, offset);
-	*(array + *offset) = ArrayNode(node->_key, node->_value);
+	ArrayNode* array_node = array + *offset;
+	array_node->_key = node->_key;
+	array_node->_value = node->_value;
 	*offset = *offset + 1;
 	add_to_array_recursion(node->_right_son, array, offset);
 }
