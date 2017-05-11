@@ -45,6 +45,6 @@ StatusType IncreaseLevel(void *DS, int Grade, int PowerIncrease) {
 
 void Quit(void** DS) {
 	if (DS == NULL) return;
-	delete ((School*)DS);
+	delete *((School**)DS);
 	*DS = NULL;
 }
