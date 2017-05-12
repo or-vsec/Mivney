@@ -30,7 +30,9 @@ public:
 	// O(n)
 	~AVLTree() { delete_recursive(_root); };
 	AVLTree(ArrayNode* array, int size);
+	AVLTree& operator=(const AVLTree& other);
 	static ArrayNode* tree_to_array(const AVLTree& tree);
+
 	// O(1)
 	AVLTree() : _root(NULL), _last_searched(NULL), _biggest(NULL), _size(0) {};
 
@@ -98,6 +100,7 @@ protected:
 
 	// O(n)
 	static void delete_recursive(Node* node);
+	static void copy_recursive(Node* node, Node* other);
 	static void add_to_array_recursion(Node* node, ArrayNode* array, int* offset);
 	static void add_from_array_recursion(Node* root, ArrayNode* array, int* offset);
 	static Node* complete_tree(int height);
@@ -244,6 +247,23 @@ void AVLTree<KeyType, ValueType>::delete_recursive(Node * node)
 }
 
 template<typename KeyType, typename ValueType>
+void AVLTree<KeyType, ValueType>::copy_recursive(Node * node, Node* other)
+{
+	if (other->_left_son != NULL) {
+		node->_left_son = new Node(other->_left_son->_key, other->_left_son->_value);
+		node->_left_son->_height = other->_left_son->_height;
+		node->_left_son->_parent = node;
+		copy_recursive(node->_left_son, other->_left_son);
+	}
+	if (other->_right_son != NULL) {
+		node->_right_son = new Node(other->_right_son->_key, other->_right_son->_value);
+		node->_right_son->_height = other->_right_son->_height;
+		node->_right_son->_parent = node;
+		copy_recursive(node->_right_son, other->_right_son);
+	}
+}
+
+template<typename KeyType, typename ValueType>
 void AVLTree<KeyType, ValueType>::add_to_array_recursion(Node * node, ArrayNode* array, int * offset)
 {
 	if (node == NULL) return;
@@ -326,6 +346,16 @@ AVLTree<KeyType, ValueType>::AVLTree(ArrayNode* array, int size)
 	_root = blank_tree;
 	_size = size;
 	update_biggest();
+}
+
+template<typename KeyType, typename ValueType>
+AVLTree<KeyType, ValueType>& AVLTree<KeyType, ValueType>::operator=(const AVLTree<KeyType, ValueType>& other)
+{
+	delete_recursive(_root);
+	_root = new Node(*other._root);
+	copy_recursive(_root, other._root);
+	_size = other.size();
+	return *this;
 }
 
 template<typename KeyType, typename ValueType>
