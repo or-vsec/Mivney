@@ -91,7 +91,9 @@ StatusType School::remove_student(int StudentID) {
 	try {
 		Mutant* mut = mutants_by_id.find(StudentID);
 		Team* team = mut->team;
-		team->mutants->erase(mut->power);
+		if (team != NULL) {
+			team->mutants->erase(mut->power);
+		}
 		mutants_by_power.erase(mut->power);
 		mutants_by_id.erase(StudentID);
 		delete mut;
