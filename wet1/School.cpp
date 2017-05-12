@@ -116,7 +116,7 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 		}
 		*numOfStudents = mutants_tree->size();
 		if (*numOfStudents == 0) {
-			**Students = NULL;
+			*Students = NULL;
 			return SUCCESS;
 		}
 		else {
@@ -173,7 +173,7 @@ static StatusType merge(AVLTree<PowerID, Mutant*>& mutants, int Grade, int Power
 			mutants_array[ind_comb++]._value = same_grade_mutants[ind_same++];
 		}
 		while (ind_diff < cnt_diff) {
-			mutants_array[ind_comb++]._value = same_grade_mutants[ind_same++];
+			mutants_array[ind_comb++]._value = diff_grade_mutants[ind_diff++];
 		}
 		for (int i = 0; i < ind_comb; i++) {
 			mutants_array[i]._key = mutants_array[i]._value->power;
