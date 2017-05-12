@@ -3,7 +3,6 @@
 
 void* Init() {
 	School * DS = new School();
-	DS->add_team(0);
 	return (void*)DS;
 }
 
