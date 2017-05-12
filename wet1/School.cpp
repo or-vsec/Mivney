@@ -52,9 +52,9 @@ StatusType School::move_student_to_team(int StudentID, int TeamID) {
 		Mutant* mut = mutants_by_id.find(StudentID);
 		Team* toteam = &teams.find(TeamID);
 		Team* fromteam = mut->team;
-		toteam->mutants.insert(mut->power, mut);
+		toteam->mutants->insert(mut->power, mut);
 		if (fromteam != NULL) {
-			fromteam->mutants.erase(mut->power);
+			fromteam->mutants->erase(mut->power);
 		}
 		mut->team = toteam;
 	}
@@ -74,7 +74,7 @@ StatusType School::get_most_powerful(int TeamID, int *StudentID) {
 			*StudentID = mutants_by_power.biggest()->id;
 		}
 		else {
-			*StudentID = teams.find(TeamID).mutants.biggest()->id;
+			*StudentID = teams.find(TeamID).mutants->biggest()->id;
 		}
 	}
 	catch (AVLTreeKeyNotFoundException) {
@@ -91,7 +91,7 @@ StatusType School::remove_student(int StudentID) {
 	try {
 		Mutant* mut = mutants_by_id.find(StudentID);
 		Team* team = mut->team;
-		team->mutants.erase(mut->power);
+		team->mutants->erase(mut->power);
 		mutants_by_power.erase(mut->power);
 		mutants_by_id.erase(StudentID);
 		delete mut;
@@ -110,7 +110,7 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 			mutants_tree = &mutants_by_power;
 		}
 		else {
-			mutants_tree = &teams.find(TeamID).mutants;
+			mutants_tree = teams.find(TeamID).mutants;
 		}
 		*numOfStudents = mutants_tree->size();
 		if (*numOfStudents == 0) {
@@ -125,9 +125,9 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 				return ALLOCATION_ERROR;
 			}
 			for (int i = 0; i < (*numOfStudents); i++) {
-				(*Students)[(*numOfStudents) - i - 1] = mutants_array[i]._value->id; // added reversed because tree is built from weakest to strongest
+				(*Students)[*numOfStudents - 1 - i] = mutants_array[i]._value->id; // added reversed because tree is built from weakest to strongest
 			}
-			delete mutants_array;
+			delete[] mutants_array;
 		}
 	}
 	catch (std::bad_alloc) {
@@ -193,7 +193,7 @@ StatusType School::increase_level(int Grade, int PowerIncrease) {
 			return ALLOCATION_ERROR;
 		AVLTree<int, Team>::ArrayNode* team_array = AVLTree<int, Team>::tree_to_array(teams);
 		for (int i = 0; i < teams.size(); i++) {
-			if (merge(team_array[i]._value.mutants, Grade, 0) == ALLOCATION_ERROR)
+			if (merge(*team_array[i]._value.mutants, Grade, 0) == ALLOCATION_ERROR)
 				return ALLOCATION_ERROR;
 		}
 		delete[] team_array;
@@ -204,10 +204,15 @@ StatusType School::increase_level(int Grade, int PowerIncrease) {
 	return SUCCESS;
 }
 
-
 School::~School() {
+	AVLTree<int, Team>::ArrayNode* team_array = AVLTree<int, Team>::tree_to_array(teams);
+	for (int i = 0; i < teams.size(); i++) {
+		delete team_array[i]._value.mutants;
+	}
+	delete team_array;
 	AVLTree<int, Mutant*>::ArrayNode* mutants_array = AVLTree<int, Mutant*>::tree_to_array(mutants_by_id);
 	for (int i = 0; i < mutants_by_id.size(); i++) {
 		delete mutants_array[i]._value;
 	}
+	delete mutants_array;
 }
