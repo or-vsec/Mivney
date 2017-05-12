@@ -333,8 +333,13 @@ void AVLTree<KeyType, ValueType>::minimize_complete_tree(Node* node, int final_s
 }
 
 template<typename KeyType, typename ValueType>
-AVLTree<KeyType, ValueType>::AVLTree(ArrayNode* array, int size)
+AVLTree<KeyType, ValueType>::AVLTree(ArrayNode* array, int size) 
+	: _root(NULL), _last_searched(NULL), _biggest(NULL), _size(0)
 {
+	if (size == 0) {
+		delete[] array;
+		return;
+	}
 	int height = (int)floor(log2(size));
 	Node* blank_tree = complete_tree(height);
 	int current_size = (int)pow(2, height + 1) - 1;
@@ -352,9 +357,12 @@ template<typename KeyType, typename ValueType>
 AVLTree<KeyType, ValueType>& AVLTree<KeyType, ValueType>::operator=(const AVLTree<KeyType, ValueType>& other)
 {
 	delete_recursive(_root);
-	_root = new Node(*other._root);
-	copy_recursive(_root, other._root);
+	if (other._root != NULL) {
+		_root = new Node(*other._root);
+		copy_recursive(_root, other._root);
+	}
 	_size = other.size();
+	update_biggest();
 	return *this;
 }
 
