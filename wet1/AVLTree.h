@@ -357,6 +357,7 @@ template<typename KeyType, typename ValueType>
 AVLTree<KeyType, ValueType>& AVLTree<KeyType, ValueType>::operator=(const AVLTree<KeyType, ValueType>& other)
 {
 	delete_recursive(_root);
+	_root = NULL;
 	if (other._root != NULL) {
 		_root = new Node(*other._root);
 		copy_recursive(_root, other._root);

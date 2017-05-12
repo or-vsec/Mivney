@@ -47,7 +47,7 @@ class Team {
 public:
 	int id;
 	AVLTree<PowerID, Mutant*>* mutants; //Sorted by power;
-	Team(int id) : id(id) { mutants = new AVLTree<PowerID, Mutant*>; }
+	Team(int id) : id(id), mutants(NULL) {}
 	Team() = default;
 };
 

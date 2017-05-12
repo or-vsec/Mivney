@@ -36,6 +36,7 @@ StatusType School::add_team(int TeamID) {
 	if (TeamID <= 0) return INVALID_INPUT;
 	try {
 		teams.insert(TeamID, Team(TeamID));
+		teams.find(TeamID).mutants = new AVLTree<PowerID, Mutant*>;
 	}
 	catch (std::bad_alloc) {
 		return ALLOCATION_ERROR;
@@ -52,6 +53,7 @@ StatusType School::move_student_to_team(int StudentID, int TeamID) {
 		Mutant* mut = mutants_by_id.find(StudentID);
 		Team* toteam = &teams.find(TeamID);
 		Team* fromteam = mut->team;
+		if (fromteam == toteam) return SUCCESS;
 		toteam->mutants->insert(mut->power, mut);
 		if (fromteam != NULL) {
 			fromteam->mutants->erase(mut->power);
