@@ -322,7 +322,7 @@ AVLTree<KeyType, ValueType>::AVLTree(ArrayNode* array, int size)
 
 	int array_offset = 0;
 	add_from_array_recursion(blank_tree, array, &array_offset);
-	delete array;
+	delete[] array;
 	_root = blank_tree;
 	_size = size;
 	update_biggest();
