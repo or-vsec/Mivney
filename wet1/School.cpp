@@ -121,7 +121,7 @@ StatusType School::get_all_students_by_power(int TeamID, int **Students, int *nu
 			AVLTree<PowerID, Mutant*>::ArrayNode* mutants_array = AVLTree<PowerID, Mutant*>::tree_to_array(*mutants_tree);
 			*Students = (int*)malloc(*numOfStudents * sizeof(int));
 			if (*Students == NULL) {
-				delete mutants_array;
+				delete[] mutants_array;
 				return ALLOCATION_ERROR;
 			}
 			for (int i = 0; i < (*numOfStudents); i++) {
@@ -176,9 +176,9 @@ static StatusType merge(AVLTree<PowerID, Mutant*>& mutants, int Grade, int Power
 		for (int i = 0; i < ind_comb; i++) {
 			mutants_array[i]._key = mutants_array[i]._value->power;
 		}
-		delete same_grade_mutants;
-		delete diff_grade_mutants;
-		mutants = *new AVLTree<PowerID, Mutant*>(mutants_array, ind_comb);
+		delete[] same_grade_mutants;
+		delete[] diff_grade_mutants;
+		mutants = AVLTree<PowerID, Mutant*>(mutants_array, ind_comb);
 	}
 	catch (std::bad_alloc) {
 		return ALLOCATION_ERROR;
@@ -209,10 +209,10 @@ School::~School() {
 	for (int i = 0; i < teams.size(); i++) {
 		delete team_array[i]._value.mutants;
 	}
-	delete team_array;
+	delete[] team_array;
 	AVLTree<int, Mutant*>::ArrayNode* mutants_array = AVLTree<int, Mutant*>::tree_to_array(mutants_by_id);
 	for (int i = 0; i < mutants_by_id.size(); i++) {
 		delete mutants_array[i]._value;
 	}
-	delete mutants_array;
+	delete[] mutants_array;
 }

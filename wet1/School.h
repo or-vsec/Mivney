@@ -40,7 +40,7 @@ public:
 	int grade;
 	PowerID power;
 	Team* team;
-	Mutant(int id, int grade, int power) : id(id), grade(grade), power(id, power) {}
+	Mutant(int id, int grade, int power) : id(id), grade(grade), power(id, power), team(NULL) {}
 };
 
 class Team {
