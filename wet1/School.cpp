@@ -197,8 +197,10 @@ StatusType School::increase_level(int Grade, int PowerIncrease) {
 			return ALLOCATION_ERROR;
 		AVLTree<int, Team>::ArrayNode* team_array = AVLTree<int, Team>::tree_to_array(teams);
 		for (int i = 0; i < teams.size(); i++) {
-			if (merge(*team_array[i]._value.mutants, Grade, 0) == ALLOCATION_ERROR)
+			if (merge(*team_array[i]._value.mutants, Grade, 0) == ALLOCATION_ERROR) {
+				delete[] team_array;
 				return ALLOCATION_ERROR;
+			}
 		}
 		delete[] team_array;
 	}
