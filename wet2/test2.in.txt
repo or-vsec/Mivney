@@ -1,0 +1,14 @@
+Init 3
+AddStudent 1 1 2
+AddStudent 1 2 2
+AddStudent 2 2 4
+AddStudent 3 3 3
+RemoveStudent 1
+AddStudent 1 1 2
+TeamFight 1 2 2
+JoinTeams 1 3
+TeamFight 1 2 2
+GetNumOfWins 1
+GetNumOfWins 2
+GetStudentLeader 1
+Quit

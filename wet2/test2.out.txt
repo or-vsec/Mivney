@@ -1,0 +1,14 @@
+Init done.
+AddStudent: SUCCESS
+AddStudent: FAILURE
+AddStudent: SUCCESS
+AddStudent: SUCCESS
+RemoveStudent: SUCCESS
+AddStudent: SUCCESS
+TeamFight: SUCCESS
+JoinTeams: SUCCESS 
+TeamFight: SUCCESS
+Team 1 won 1 times.
+Team 2 won 1 times.
+The leader is: 3
+Quit done.
