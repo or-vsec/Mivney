@@ -43,7 +43,7 @@ public:
 	ValueType& find(KeyType const & key);
 	int rank(KeyType const & key);
 	ValueType& select(int index);
-	KeyType* get_fighters_total_power(int num_of_fighters);
+	KeyType& get_fighters_total_power(int num_of_fighters);
 
 	// O(1)
 	ValueType& biggest() const;
@@ -99,6 +99,7 @@ protected:
 	Node* _last_searched;
 	Node* _biggest;
 	int _size;
+	KeyType _fighters_power;
 
 	// Protected methods
 	// O(log n)
@@ -135,7 +136,7 @@ typename AVLTree<KeyType, ValueType>::Node* AVLTree<KeyType, ValueType>::find_re
 {
 	if (node == NULL) throw AVLTreeKeyNotFoundException();
 	_last_searched = node;
-	if (node->_key > key) return find_recursion(key, node->_left_son, rank);
+	if (key < node->_key) return find_recursion(key, node->_left_son, rank);
 
 	if (rank != NULL) {
 		if (node->_left_son != NULL) *rank = *rank + node->_left_son->_total_nodes;
@@ -431,7 +432,7 @@ AVLTree<KeyType, ValueType>::AVLTree(const AVLTree & tree1, const AVLTree & tree
 			array_total[cnt_total]._value = array1[cnt1]._value;
 			array_total[cnt_total++]._key = array1[cnt1++]._key;
 		}
-		else if (array1[cnt1]._key > array2[cnt2]._key) {
+		else if (array2[cnt2]._key < array1[cnt1]._key) {
 			array_total[cnt_total]._value = array2[cnt2]._value;
 			array_total[cnt_total++]._key = array2[cnt2++]._key;
 		}
@@ -558,14 +559,14 @@ ValueType & AVLTree<KeyType, ValueType>::select(int index)
 }
 
 template<typename KeyType, typename ValueType>
-KeyType* AVLTree<KeyType, ValueType>::get_fighters_total_power(int num_of_fighters)
+KeyType& AVLTree<KeyType, ValueType>::get_fighters_total_power(int num_of_fighters)
 {
-	KeyType* total_sum = new KeyType();
-	if (num_of_fighters >= _size) total_sum = &(_root->_total_sum);
+	_fighters_power = KeyType();
+	if (num_of_fighters >= _size) _fighters_power = _root->_total_sum;
 	else {
-		select_recursion(_size - num_of_fighters + 1, _root, total_sum);
+		select_recursion(_size - num_of_fighters + 1, _root, &_fighters_power);
 	}
-	return total_sum;
+	return _fighters_power;
 }
 
 #endif    /*_AVLTREE_ */
