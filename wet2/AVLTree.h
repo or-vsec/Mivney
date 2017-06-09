@@ -40,6 +40,8 @@ public:
 	void insert(KeyType const & key, ValueType const & value);
 	void erase(KeyType const & key);
 	ValueType& find(KeyType const & key);
+	int rank(KeyType const & key);
+	ValueType& select(int index);
 
 	// O(1)
 	ValueType& biggest() const;
@@ -57,7 +59,7 @@ protected:
 		int _height;
 		KeyType _total_sum;
 		int _total_nodes;
-		Node(KeyType const & key, ValueType const & value) : _key(key), _value(value), _parent(NULL), _left_son(NULL), _right_son(NULL), _height(0), _total_nodes(1) {}
+		Node(KeyType const & key, ValueType const & value) : _key(key), _value(value), _parent(NULL), _left_son(NULL), _right_son(NULL), _height(0), _total_nodes(1), _total_sum(key) {}
 		Node() : _parent(NULL), _left_son(NULL), _right_son(NULL), _height(0), _total_nodes(1) {}
 		void update_height_ranks() {
 			if (_left_son == NULL && _right_son == NULL) {
@@ -98,7 +100,9 @@ protected:
 
 	// Protected methods
 	// O(log n)
-	Node* find_recursion(KeyType const & key, Node* node);
+	Node* find_recursion(KeyType const & key, Node* node, int* rank);
+	Node* select_recursion(int index, Node* node);
+
 	void update_biggest();
 
 	// O(1)
@@ -119,6 +123,7 @@ protected:
 	static void copy_recursive(Node* node, Node* other);
 	static void add_to_array_recursion(Node* node, ArrayNode* array, int* offset);
 	static void add_from_array_recursion(Node* root, ArrayNode* array, int* offset);
+	static void update_ranks_recursion(Node* root);
 	static Node* complete_tree(int height);
 	static void minimize_complete_tree(Node* root, int final_size, int *current_size);
 };
@@ -126,13 +131,29 @@ protected:
 
 
 template<typename KeyType, typename ValueType>
-typename AVLTree<KeyType, ValueType>::Node* AVLTree<KeyType, ValueType>::find_recursion(KeyType const & key, Node * node)
+typename AVLTree<KeyType, ValueType>::Node* AVLTree<KeyType, ValueType>::find_recursion(KeyType const & key, Node * node, int * rank)
 {
 	if (node == NULL) throw AVLTreeKeyNotFoundException();
 	_last_searched = node;
+	if (node->_key > key) return find_recursion(key, node->_left_son, rank);
+
+	if (rank != NULL) {
+		if (node->_left_son != NULL) *rank = *rank + node->_left_son->_total_nodes;
+		*rank = *rank + 1;
+	}
 	if (node->_key == key) return node;
-	else if (node->_key < key) return find_recursion(key, node->_right_son);
-	return find_recursion(key, node->_left_son);
+	return find_recursion(key, node->_right_son, rank);
+}
+
+template<typename KeyType, typename ValueType>
+typename AVLTree<KeyType, ValueType>::Node * AVLTree<KeyType, ValueType>::select_recursion(int index, Node * node)
+{
+	if (node == NULL) throw AVLTreeKeyNotFoundException();
+	int w = 0;
+	if (node->_left_son != NULL) w = node->_left_son->_total_nodes;
+	if (w == index - 1) return node;
+	if (w > index - 1) return select_recursion(index, node->_left_son);
+	return select_recursion(index - w - 1, node->_right_son);
 }
 
 template<typename KeyType, typename ValueType>
@@ -313,6 +334,15 @@ void AVLTree<KeyType, ValueType>::add_from_array_recursion(Node * node, ArrayNod
 }
 
 template<typename KeyType, typename ValueType>
+void AVLTree<KeyType, ValueType>::update_ranks_recursion(Node * node)
+{
+	if (node == NULL) return;
+	update_ranks_recursion(node->_left_son);
+	update_ranks_recursion(node->_right_son);
+	node->update_height_ranks();
+}
+
+template<typename KeyType, typename ValueType>
 typename AVLTree<KeyType, ValueType>::ArrayNode* AVLTree<KeyType, ValueType>::tree_to_array(const AVLTree<KeyType, ValueType>& tree)
 {
 	ArrayNode* array = new ArrayNode[tree._size];
@@ -373,6 +403,7 @@ AVLTree<KeyType, ValueType>::AVLTree(ArrayNode* array, int size)
 	int array_offset = 0;
 	add_from_array_recursion(blank_tree, array, &array_offset);
 	delete[] array;
+	update_ranks_recursion(blank_tree);
 	_root = blank_tree;
 	_size = size;
 	update_biggest();
@@ -402,7 +433,7 @@ void AVLTree<KeyType, ValueType>::insert(KeyType const & key, ValueType const & 
 		return;
 	}
 	try {
-		find_recursion(key, _root);
+		find_recursion(key, _root, NULL);
 		throw AVLTreeKeyAlreadyExistsExpection();
 	}
 	catch (AVLTreeKeyNotFoundException) {}
@@ -423,7 +454,7 @@ void AVLTree<KeyType, ValueType>::insert(KeyType const & key, ValueType const & 
 template<typename KeyType, typename ValueType>
 void AVLTree<KeyType, ValueType>::erase(KeyType const & key)
 {
-	Node* node_to_delete = find_recursion(key, _root);
+	Node* node_to_delete = find_recursion(key, _root, NULL);
 	if (node_to_delete->_left_son != NULL && node_to_delete->_right_son != NULL) {
 		Node* next_minimal_node = node_to_delete->_right_son;
 		while (next_minimal_node->_left_son != NULL) {
@@ -465,7 +496,21 @@ ValueType & AVLTree<KeyType, ValueType>::biggest() const
 template<typename KeyType, typename ValueType>
 ValueType& AVLTree<KeyType, ValueType>::find(KeyType const & key)
 {
-	return find_recursion(key, _root)->_value;
+	return find_recursion(key, _root, NULL)->_value;
+}
+
+template<typename KeyType, typename ValueType>
+inline int AVLTree<KeyType, ValueType>::rank(KeyType const & key)
+{
+	int rank = 0;
+	find_recursion(key, _root, &rank);
+	return rank;
+}
+
+template<typename KeyType, typename ValueType>
+ValueType & AVLTree<KeyType, ValueType>::select(int index)
+{
+	return select_recursion(index, _root)->_value;
 }
 
 #endif    /*_AVLTREE_ */
