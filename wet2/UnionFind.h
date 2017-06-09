@@ -21,8 +21,8 @@ protected:
 	class Node {
 	public:
 		ValueType _value;
-		Node* _parent;
 		int _id;
+		Node* _parent;
 		Node(int id) : _id(id), _parent(NULL) {}
 	};
 

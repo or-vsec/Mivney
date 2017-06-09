@@ -59,8 +59,8 @@ protected:
 		Node* _left_son;
 		Node* _right_son;
 		int _height;
-		KeyType _total_sum;
 		int _total_nodes;
+		KeyType _total_sum;
 		Node(KeyType const & key, ValueType const & value) : _key(key), _value(value), _parent(NULL), _left_son(NULL), _right_son(NULL), _height(0), _total_nodes(1), _total_sum(key) {}
 		Node() : _parent(NULL), _left_son(NULL), _right_son(NULL), _height(0), _total_nodes(1) {}
 		void update_height_ranks() {
