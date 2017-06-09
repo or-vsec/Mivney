@@ -56,7 +56,7 @@ protected:
 		Node* _right_son;
 		int _height;
 		Node(KeyType const & key, ValueType const & value) : _key(key), _value(value), _parent(NULL), _left_son(NULL), _right_son(NULL), _height(0) {}
-		Node() = default;
+		Node() : _parent(NULL), _left_son(NULL), _right_son(NULL), _height(0) {}
 		void update_height() {
 			if (_left_son == NULL && _right_son == NULL) _height = 0;
 			else if (_right_son == NULL) _height = _left_son->_height + 1;
