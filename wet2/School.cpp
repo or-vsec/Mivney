@@ -48,8 +48,15 @@ StatusType School::remove_student(int student_id)
 StatusType School::join_teams(int team_1, int team_2)
 {
 	if (team_1 <= 0 || team_2 <= 0 || team_1 > n || team_2 > n) return INVALID_INPUT;
-	AVLTree<PowerID, Mutant*> merged_tree(teams.Find(team_1).mutants, teams.Find(team_2).mutants);
-	teams.Union(team_1, team_2).mutants = merged_tree;
+	Team& team1 = teams.Find(team_1);
+	Team& team2 = teams.Find(team_2);	
+	try {
+		Team& new_team = teams.Union(team_1, team_2);
+		AVLTree<PowerID, Mutant*> merged_tree(team1.mutants, team2.mutants);
+		new_team.mutants = merged_tree;
+		new_team.num_of_wins = team1.num_of_wins + team2.num_of_wins;
+	}
+	catch (UnionFindSameGroupException) {}
 	return SUCCESS;
 }
 
