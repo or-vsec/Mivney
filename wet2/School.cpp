@@ -52,7 +52,7 @@ StatusType School::join_teams(int team_1, int team_2)
 	Team& team2 = teams.Find(team_2);	
 	try {
 		Team& new_team = teams.Union(team_1, team_2);
-		AVLTree<PowerID, Mutant*> merged_tree(team1.mutants, team2.mutants);
+		AVLTree<PowerID, Mutant*> merged_tree = AVLTree<PowerID, Mutant*>::merge(team1.mutants, team2.mutants);
 		new_team.mutants = merged_tree;
 		new_team.num_of_wins = team1.num_of_wins + team2.num_of_wins;
 	}
@@ -85,8 +85,13 @@ StatusType School::get_num_of_wins(int team_id, int * wins)
 StatusType School::get_student_team_leader(int student_id, int * leader)
 {
 	if (student_id <= 0 || leader == NULL) return INVALID_INPUT;
-	int team_id = mutants.get(student_id).team;
-	*leader = teams.Find(team_id).mutants.biggest()->id;
+	try {
+		int team_id = mutants.get(student_id).team;
+		*leader = teams.Find(team_id).mutants.biggest()->id;
+	}
+	catch (HashTableKeyNotFoundException) {
+		return FAILURE;
+	}
 	return SUCCESS;
 }
 

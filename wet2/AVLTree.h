@@ -30,7 +30,7 @@ public:
 	// O(n)
 	~AVLTree() { delete_recursive(_root); };
 	AVLTree(ArrayNode* array, int size);
-	AVLTree(const AVLTree& tree1, const AVLTree& tree2); // merge func
+	static AVLTree merge(const AVLTree& tree1, const AVLTree& tree2);
 	AVLTree& operator=(const AVLTree& other);
 	static ArrayNode* tree_to_array(const AVLTree& tree);
 
@@ -417,7 +417,7 @@ AVLTree<KeyType, ValueType>::AVLTree(ArrayNode* array, int size)
 }
 
 template<typename KeyType, typename ValueType>
-AVLTree<KeyType, ValueType>::AVLTree(const AVLTree & tree1, const AVLTree & tree2)
+AVLTree<KeyType, ValueType> AVLTree<KeyType, ValueType>::merge(const AVLTree & tree1, const AVLTree & tree2)
 {
 	ArrayNode* array1 = tree_to_array(tree1);
 	ArrayNode* array2 = tree_to_array(tree2);
@@ -450,7 +450,7 @@ AVLTree<KeyType, ValueType>::AVLTree(const AVLTree & tree1, const AVLTree & tree
 	delete[] array1;
 	delete[] array2;
 
-	*this = *new AVLTree(array_total, tree1._size + tree2._size);;
+	return AVLTree(array_total, tree1._size + tree2._size);
 }
 
 
@@ -562,6 +562,7 @@ template<typename KeyType, typename ValueType>
 KeyType& AVLTree<KeyType, ValueType>::get_fighters_total_power(int num_of_fighters)
 {
 	_fighters_power = KeyType();
+	if (_size == 0) return _fighters_power;
 	if (num_of_fighters >= _size) _fighters_power = _root->_total_sum;
 	else {
 		select_recursion(_size - num_of_fighters + 1, _root, &_fighters_power);

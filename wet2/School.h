@@ -13,7 +13,7 @@ class PowerID {
 public:
 	int id;
 	int power;
-	PowerID() = default;
+	PowerID() : id(0), power(0) {};
 	PowerID(int id, int power) : id(id), power(power) {}
 	bool operator==(const PowerID& rhs) const {
 		return id == rhs.id && power == rhs.power;
