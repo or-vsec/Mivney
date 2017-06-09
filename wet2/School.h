@@ -2,15 +2,17 @@
 #define _SCHOOL_
 
 #include "AVLTree.h"
-#include "library1.h"
+#include "UnionFind.h"
+#include "HashTable.h"
+#include "library2.h"
 #include <iostream>
 
 class Team;
 
 class PowerID {
+public:
 	int id;
 	int power;
-public:
 	PowerID() = default;
 	PowerID(int id, int power) : id(id), power(power) {}
 	bool operator==(const PowerID& rhs) const {
@@ -32,42 +34,60 @@ public:
 		this->power += power;
 		return *this;
 	}
+	PowerID& operator+=(const PowerID& rhs)
+	{
+		this->power += rhs.power;
+		return *this;
+	}
+	PowerID operator+(const PowerID& rhs) const
+	{
+		PowerID result;
+		result.id = this->id;
+		result.power = this->power + rhs.power;
+		return result;
+	}
+	PowerID operator-(const PowerID& rhs) const
+	{
+		PowerID result;
+		result.id = this->id;
+		result.power = this->power - rhs.power;
+		return result;
+	}
+
 };
 
 class Mutant {
 public:
 	int id;
 	PowerID power;
-	Team* team;
-	Mutant(int id, int power) : id(id), power(id, power), team(NULL) {}
+	int team;
+	Mutant(int id, int power, int team) : id(id), power(id, power), team(team) {}
 };
 
 class Team {
 public:
-	int id;
 	int num_of_wins;
-	AVLTree<PowerID, Mutant*>* mutants; //Sorted by power;
-	Team(int id) : id(id), mutants(NULL), num_of_wins(0) {}
-	Team() = default;
+	AVLTree<PowerID, Mutant*> mutants; //Sorted by power;
+	Team() : num_of_wins(0) {}
 };
 
 class School {
-
-	HashTable<int, Mutant*> mutants_by_id;
-	UnionFind<int, Team> teams;
-
+	
+	HashTable<Mutant> mutants;
+	UnionFind<Team> teams;
+	int n;
+	
 public:
 
-	StatusType add_student(int student_id, int grade, int power);
-	StatusType add_team(int TeamID);
-	StatusType move_student_to_team(int StudentID, int TeamID);
-	StatusType get_most_powerful(int TeamID, int *StudentID);
-	StatusType remove_student(int StudentID);
-	StatusType increase_level(int Grade, int PowerIncrease);
-	StatusType get_all_students_by_power(int TeamID, int **Students, int *numOfStudents);
+	School(int n);
 	~School();
-	School() = default;
-
+	StatusType add_student(int student_id, int team_id, int power);
+	StatusType remove_student(int student_id);
+	StatusType join_teams(int team_1, int team_2);
+	StatusType team_fight(int team_1, int team_2, int num_of_fighters);
+	StatusType get_num_of_wins(int team_id, int * wins);
+	StatusType get_student_team_leader(int student_id, int * leader);
+	
 };
 
 #endif

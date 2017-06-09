@@ -1,29 +1,15 @@
-#include "library1.h" 
+#include "library2.h" 
 #include "School.h"
 
-void* Init() {
-	School * DS = new School();
+void * Init(int n)
+{
+	School * DS = new School(n);
 	return (void*)DS;
 }
 
-StatusType AddStudent(void *DS, int StudentID, int Grade, int Power) {
+StatusType AddStudent(void *DS, int StudentID, int Team, int Power) {
 	if (DS == NULL) return INVALID_INPUT;
-	return ((School*)DS)->add_student(StudentID, Grade, Power);
-}
-
-StatusType AddTeam(void *DS, int TeamID) {
-	if (DS == NULL) return INVALID_INPUT;
-	return ((School*)DS)->add_team(TeamID);
-}
-
-StatusType MoveStudentToTeam(void *DS, int StudentID, int TeamID) {
-	if (DS == NULL) return INVALID_INPUT;
-	return ((School*)DS)->move_student_to_team(StudentID, TeamID);
-}
-
-StatusType GetMostPowerful(void *DS, int TeamID, int *StudentID) {
-	if (DS == NULL) return INVALID_INPUT;
-	return ((School*)DS)->get_most_powerful(TeamID, StudentID);
+	return ((School*)DS)->add_student(StudentID, Team, Power);
 }
 
 StatusType RemoveStudent(void *DS, int StudentID) {
@@ -31,15 +17,29 @@ StatusType RemoveStudent(void *DS, int StudentID) {
 	return ((School*)DS)->remove_student(StudentID);
 }
 
-
-StatusType GetAllStudentsByPower(void *DS, int TeamID, int **Students, int *numOfStudents) {
-	if ((DS == NULL)||(Students==NULL)||(numOfStudents==NULL)) return INVALID_INPUT;
-	return ((School*)DS)->get_all_students_by_power(TeamID, Students, numOfStudents);
+StatusType JoinTeams(void * DS, int Team1, int Team2)
+{
+	if (DS == NULL) return INVALID_INPUT;
+	return ((School*)DS)->join_teams(Team1, Team2);
 }
 
-StatusType IncreaseLevel(void *DS, int Grade, int PowerIncrease) {
+StatusType TeamFight(void * DS, int Team1, int Team2, int NumOfFighters)
+{
 	if (DS == NULL) return INVALID_INPUT;
-	return ((School*)DS)->increase_level(Grade, PowerIncrease);
+	return ((School*)DS)->team_fight(Team1, Team2, NumOfFighters);
+}
+
+StatusType GetNumOfWins(void * DS, int Team, int * Wins)
+{
+	if (DS == NULL) return INVALID_INPUT;
+	return ((School*)DS)->get_num_of_wins(Team, Wins);
+}
+
+
+StatusType GetStudentTeamLeader(void * DS, int StudentID, int * Leader)
+{
+	if (DS == NULL) return INVALID_INPUT;
+	return ((School*)DS)->get_student_team_leader(StudentID, Leader);
 }
 
 void Quit(void** DS) {
