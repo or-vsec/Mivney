@@ -42,7 +42,7 @@ public:
 	ValueType& find(KeyType const & key);
 	int rank(KeyType const & key);
 	ValueType& select(int index);
-	KeyType* get_index_total_sum(int index);
+	KeyType* get_fighters_total_power(int num_of_fighters);
 
 	// O(1)
 	ValueType& biggest() const;
@@ -519,10 +519,13 @@ ValueType & AVLTree<KeyType, ValueType>::select(int index)
 }
 
 template<typename KeyType, typename ValueType>
-KeyType* AVLTree<KeyType, ValueType>::get_index_total_sum(int index)
+KeyType* AVLTree<KeyType, ValueType>::get_fighters_total_power(int num_of_fighters)
 {
 	KeyType* total_sum = new KeyType();
-	select_recursion(index, total_sum);
+	if (num_of_fighters >= _size) total_sum = &(_root->_total_sum);
+	else {
+		select_recursion(_size - num_of_fighters + 1, total_sum);
+	}
 	return total_sum;
 }
 
