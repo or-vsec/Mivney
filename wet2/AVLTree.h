@@ -55,15 +55,31 @@ protected:
 		Node* _left_son;
 		Node* _right_son;
 		int _height;
-		Node(KeyType const & key, ValueType const & value) : _key(key), _value(value), _parent(NULL), _left_son(NULL), _right_son(NULL), _height(0) {}
-		Node() : _parent(NULL), _left_son(NULL), _right_son(NULL), _height(0) {}
-		void update_height() {
-			if (_left_son == NULL && _right_son == NULL) _height = 0;
-			else if (_right_son == NULL) _height = _left_son->_height + 1;
-			else if (_left_son == NULL) _height = _right_son->_height + 1;
+		KeyType _total_sum;
+		int _total_nodes;
+		Node(KeyType const & key, ValueType const & value) : _key(key), _value(value), _parent(NULL), _left_son(NULL), _right_son(NULL), _height(0), _total_nodes(1) {}
+		Node() : _parent(NULL), _left_son(NULL), _right_son(NULL), _height(0), _total_nodes(1) {}
+		void update_height_ranks() {
+			if (_left_son == NULL && _right_son == NULL) {
+				_height = 0;
+				_total_nodes = 1;
+				_total_sum = _key;
+			}
+			else if (_right_son == NULL) {
+				_height = _left_son->_height + 1;
+				_total_nodes = _left_son->_total_nodes + 1;
+				_total_sum = _left_son->_total_sum + _key;
+			}
+			else if (_left_son == NULL) {
+				_height = _right_son->_height + 1;
+				_total_nodes = _right_son->_total_nodes + 1;
+				_total_sum = _right_son->_total_sum + _key;
+			}
 			else {
 				if (_left_son->_height >= _right_son->_height) _height = _left_son->_height + 1;
 				else _height = _right_son->_height + 1;
+				_total_nodes = _left_son->_total_nodes + _right_son->_total_nodes + 1;
+				_total_sum = _left_son->_total_sum + _right_son->_total_sum + _key;
 			}
 		}
 		int bf() const {
@@ -133,7 +149,8 @@ template<typename KeyType, typename ValueType>
 void AVLTree<KeyType, ValueType>::swap_nodes(Node & a, Node & b)
 {
 	Node *left_son_t = a._left_son, *right_son_t = a._right_son, *parent_t = a._parent;
-	int height_t = a._height;
+	int height_t = a._height, total_nodes = a._total_nodes;
+	KeyType total_sum = a._total_sum;
 	*(parent_to_son_link_pointer(&b)) = &a;
 	*(parent_to_son_link_pointer(&a)) = &b;
 	a._left_son = b._left_son;
@@ -148,6 +165,10 @@ void AVLTree<KeyType, ValueType>::swap_nodes(Node & a, Node & b)
 	b._parent = parent_t;
 	a._height = b._height;
 	b._height = height_t;
+	a._total_nodes = b._total_nodes;
+	b._total_nodes = total_nodes;
+	a._total_sum = b._total_sum - b._key + a._key;
+	b._total_sum = total_sum - a._key + b._key;
 	if (a._parent == &a) a._parent = &b;
 	if (a._right_son == &a) a._right_son = &b;
 	if (a._left_son == &a) a._left_son = &b;
@@ -178,7 +199,7 @@ void AVLTree<KeyType, ValueType>::balance_bottom_up(Node * bottom)
 	Node *current = bottom;
 	while (current != _root) {
 		Node *parent = current->_parent;
-		parent->update_height();
+		parent->update_height_ranks();
 		if (parent->bf() > 1 || parent->bf() < -1) {
 			balance_node(parent);
 		}
@@ -196,8 +217,8 @@ void AVLTree<KeyType, ValueType>::ll_rotation(Node * b)
 	b->_left_son = a->_right_son;
 	if (a->_right_son != NULL) a->_right_son->_parent = b;
 	a->_right_son = b;
-	b->update_height();
-	a->update_height();
+	b->update_height_ranks();
+	a->update_height_ranks();
 }
 
 template<typename KeyType, typename ValueType>
@@ -217,8 +238,8 @@ void AVLTree<KeyType, ValueType>::rr_rotation(Node * b)
 	b->_right_son = a->_left_son;
 	if (a->_left_son != NULL) a->_left_son->_parent = b;
 	a->_left_son = b;
-	b->update_height();
-	a->update_height();
+	b->update_height_ranks();
+	a->update_height_ranks();
 }
 
 template<typename KeyType, typename ValueType>
@@ -252,12 +273,16 @@ void AVLTree<KeyType, ValueType>::copy_recursive(Node * node, Node* other)
 	if (other->_left_son != NULL) {
 		node->_left_son = new Node(other->_left_son->_key, other->_left_son->_value);
 		node->_left_son->_height = other->_left_son->_height;
+		node->_left_son->_total_nodes = other->_left_son->_total_nodes;
+		node->_left_son->_total_sum = other->_left_son->_total_sum;
 		node->_left_son->_parent = node;
 		copy_recursive(node->_left_son, other->_left_son);
 	}
 	if (other->_right_son != NULL) {
 		node->_right_son = new Node(other->_right_son->_key, other->_right_son->_value);
 		node->_right_son->_height = other->_right_son->_height;
+		node->_right_son->_total_nodes = other->_right_son->_total_nodes;
+		node->_right_son->_total_sum = other->_right_son->_total_sum;
 		node->_right_son->_parent = node;
 		copy_recursive(node->_right_son, other->_right_son);
 	}
