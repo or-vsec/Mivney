@@ -30,6 +30,7 @@ public:
 	// O(n)
 	~AVLTree() { delete_recursive(_root); };
 	AVLTree(ArrayNode* array, int size);
+	AVLTree(const AVLTree& tree1, const AVLTree& tree2); // merge func
 	AVLTree& operator=(const AVLTree& other);
 	static ArrayNode* tree_to_array(const AVLTree& tree);
 
@@ -383,7 +384,7 @@ void AVLTree<KeyType, ValueType>::minimize_complete_tree(Node* node, int final_s
 		else {
 			node->_parent->_right_son = NULL;
 		}
-		node->_parent->update_height();
+		node->_parent->update_height_ranks();
 		delete node;
 		(*current_size)--;
 		return;
@@ -413,6 +414,44 @@ AVLTree<KeyType, ValueType>::AVLTree(ArrayNode* array, int size)
 	_size = size;
 	update_biggest();
 }
+
+template<typename KeyType, typename ValueType>
+AVLTree<KeyType, ValueType>::AVLTree(const AVLTree & tree1, const AVLTree & tree2)
+{
+	ArrayNode* array1 = tree_to_array(tree1);
+	ArrayNode* array2 = tree_to_array(tree2);
+	ArrayNode* array_total = new ArrayNode[tree1._size + tree2._size];
+
+	int cnt1 = 0;
+	int cnt2 = 0;
+	int cnt_total = 0;
+
+	while (cnt1 < tree1._size && cnt2 < tree2._size) {
+		if (array1[cnt1]._key < array2[cnt2]._key) {
+			array_total[cnt_total]._value = array1[cnt1]._value;
+			array_total[cnt_total++]._key = array1[cnt1++]._key;
+		}
+		else if (array1[cnt1]._key > array2[cnt2]._key) {
+			array_total[cnt_total]._value = array2[cnt2]._value;
+			array_total[cnt_total++]._key = array2[cnt2++]._key;
+		}
+		else throw AVLTreeException();
+	}
+	while (cnt1 < tree1._size) {
+		array_total[cnt_total]._value = array1[cnt1]._value;
+		array_total[cnt_total++]._key = array1[cnt1++]._key;
+	}
+	while (cnt2 < tree2._size) {
+		array_total[cnt_total]._value = array2[cnt2]._value;
+		array_total[cnt_total++]._key = array2[cnt2++]._key;
+	}
+
+	delete[] array1;
+	delete[] array2;
+
+	*this = *new AVLTree(array_total, tree1._size + tree2._size);;
+}
+
 
 template<typename KeyType, typename ValueType>
 AVLTree<KeyType, ValueType>& AVLTree<KeyType, ValueType>::operator=(const AVLTree<KeyType, ValueType>& other)
