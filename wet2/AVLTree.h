@@ -102,7 +102,7 @@ protected:
 	// Protected methods
 	// O(log n)
 	Node* find_recursion(KeyType const & key, Node* node, int* rank);
-	Node* select_recursion(int index, Node* node, int* sum_total);
+	Node* select_recursion(int index, Node* node, KeyType* sum_total);
 
 	void update_biggest();
 
@@ -145,7 +145,7 @@ typename AVLTree<KeyType, ValueType>::Node* AVLTree<KeyType, ValueType>::find_re
 }
 
 template<typename KeyType, typename ValueType>
-typename AVLTree<KeyType, ValueType>::Node * AVLTree<KeyType, ValueType>::select_recursion(int index, Node * node, int* sum_total)
+typename AVLTree<KeyType, ValueType>::Node * AVLTree<KeyType, ValueType>::select_recursion(int index, Node * node, KeyType* sum_total)
 {
 	if (node == NULL) throw AVLTreeKeyNotFoundException();
 	int w = 0;
@@ -153,8 +153,8 @@ typename AVLTree<KeyType, ValueType>::Node * AVLTree<KeyType, ValueType>::select
 	if (w < index - 1) return select_recursion(index - w - 1, node->_right_son, sum_total);
 
 	if (sum_total != NULL) {
-		if (node->_right_son != NULL) *sum_total = *sum_total + node->_right_son->_total_sum;
-		*sum_total = *sum_total + node->_key;
+		if (node->_right_son != NULL) *sum_total += node->_right_son->_total_sum;
+		*sum_total += node->_key;
 	}
 
 	if (w == index - 1) return node;
@@ -524,7 +524,7 @@ KeyType* AVLTree<KeyType, ValueType>::get_fighters_total_power(int num_of_fighte
 	KeyType* total_sum = new KeyType();
 	if (num_of_fighters >= _size) total_sum = &(_root->_total_sum);
 	else {
-		select_recursion(_size - num_of_fighters + 1, total_sum);
+		select_recursion(_size - num_of_fighters + 1, _root, total_sum);
 	}
 	return total_sum;
 }
