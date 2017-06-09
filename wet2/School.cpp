@@ -94,5 +94,3 @@ StatusType School::get_student_team_leader(int student_id, int * leader)
 	}
 	return SUCCESS;
 }
-
-

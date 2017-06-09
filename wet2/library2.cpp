@@ -35,7 +35,6 @@ StatusType GetNumOfWins(void * DS, int Team, int * Wins)
 	return ((School*)DS)->get_num_of_wins(Team, Wins);
 }
 
-
 StatusType GetStudentTeamLeader(void * DS, int StudentID, int * Leader)
 {
 	if (DS == NULL) return INVALID_INPUT;
