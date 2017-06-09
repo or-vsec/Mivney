@@ -42,6 +42,7 @@ public:
 	ValueType& find(KeyType const & key);
 	int rank(KeyType const & key);
 	ValueType& select(int index);
+	KeyType* get_index_total_sum(int index);
 
 	// O(1)
 	ValueType& biggest() const;
@@ -101,7 +102,7 @@ protected:
 	// Protected methods
 	// O(log n)
 	Node* find_recursion(KeyType const & key, Node* node, int* rank);
-	Node* select_recursion(int index, Node* node);
+	Node* select_recursion(int index, Node* node, int* sum_total);
 
 	void update_biggest();
 
@@ -128,8 +129,6 @@ protected:
 	static void minimize_complete_tree(Node* root, int final_size, int *current_size);
 };
 
-
-
 template<typename KeyType, typename ValueType>
 typename AVLTree<KeyType, ValueType>::Node* AVLTree<KeyType, ValueType>::find_recursion(KeyType const & key, Node * node, int * rank)
 {
@@ -146,14 +145,20 @@ typename AVLTree<KeyType, ValueType>::Node* AVLTree<KeyType, ValueType>::find_re
 }
 
 template<typename KeyType, typename ValueType>
-typename AVLTree<KeyType, ValueType>::Node * AVLTree<KeyType, ValueType>::select_recursion(int index, Node * node)
+typename AVLTree<KeyType, ValueType>::Node * AVLTree<KeyType, ValueType>::select_recursion(int index, Node * node, int* sum_total)
 {
 	if (node == NULL) throw AVLTreeKeyNotFoundException();
 	int w = 0;
 	if (node->_left_son != NULL) w = node->_left_son->_total_nodes;
+	if (w < index - 1) return select_recursion(index - w - 1, node->_right_son, sum_total);
+
+	if (sum_total != NULL) {
+		if (node->_right_son != NULL) *sum_total = *sum_total + node->_right_son->_total_sum;
+		*sum_total = *sum_total + node->_key;
+	}
+
 	if (w == index - 1) return node;
-	if (w > index - 1) return select_recursion(index, node->_left_son);
-	return select_recursion(index - w - 1, node->_right_son);
+	return select_recursion(index, node->_left_son, sum_total);
 }
 
 template<typename KeyType, typename ValueType>
@@ -510,7 +515,15 @@ inline int AVLTree<KeyType, ValueType>::rank(KeyType const & key)
 template<typename KeyType, typename ValueType>
 ValueType & AVLTree<KeyType, ValueType>::select(int index)
 {
-	return select_recursion(index, _root)->_value;
+	return select_recursion(index, _root, NULL)->_value;
+}
+
+template<typename KeyType, typename ValueType>
+KeyType* AVLTree<KeyType, ValueType>::get_index_total_sum(int index)
+{
+	KeyType* total_sum = new KeyType();
+	select_recursion(index, total_sum);
+	return total_sum;
 }
 
 #endif    /*_AVLTREE_ */
