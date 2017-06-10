@@ -77,7 +77,7 @@ StatusType School::team_fight(int team_1, int team_2, int num_of_fighters)
 
 StatusType School::get_num_of_wins(int team_id, int * wins)
 {
-	if (team_id <= 0 || team_id <= 0 || wins == NULL) return INVALID_INPUT;
+	if (team_id <= 0 || team_id > n || wins == NULL) return INVALID_INPUT;
 	*wins = teams.Find(team_id).num_of_wins;
 	return SUCCESS;
 }
